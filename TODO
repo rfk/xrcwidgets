@@ -1,5 +1,5 @@
 
 
- * Track down segfault from multiple calls to replaceInChild (may well
-   require a debug version of wxGTK)
+    * Implement _getChild for more widget types:
+        * toolbars
 
