@@ -13,7 +13,6 @@ SLOT="0"
 KEYWORDS="~x86"
 LICENSE="wxWinLL-3"
 
-# 2.1 gave sandbox violations see #21
 DEPEND=">=dev-lang/python-2.3
         >=dev-python/wxPython-2.4.2.4"
 
