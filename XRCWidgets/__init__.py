@@ -82,7 +82,7 @@ class XRCWidget:
         if cls._xrcfilename is None:
             filePath =  "/".join(cls.__module__.split(".")) + ".xrc"
         else:
-            filePath = self._xrcfilename
+            filePath = cls._xrcfilename
         for fileLoc in cls._getXRCFileLocations():
             pth = os.path.join(fileLoc,filePath)
             if os.path.exists(pth):
@@ -183,7 +183,9 @@ class XRCWidget:
             raise XRCWidgetsError(eStr)
         menu = self._getChild_wxMenu(mData)
             
-        # Determine the item label
+        # Determine the item label.  If it has a single underscore, remove
+        # it as it will be an accelerator key.  If it has more than one,
+        # leave it alone. TODO: how does XRC respond in this case?
         lbl = None
         for c in data.children:
             if isinstance(c,XMLElementData) and c.name == "label":
@@ -191,6 +193,9 @@ class XRCWidget:
         if lbl is None:
             eStr = "Child '%s' has no label" % (data.attrs["name"],)
             raise XRCWidgetsError(eStr)
+        lblParts = lbl.split("_")
+        if len(lblParts) == 2:
+            lbl = "".join(lblParts)
 
         # Get and return the widget
         for item in menu.GetMenuItems():
@@ -302,15 +307,21 @@ class XRCWidget:
         if sizer is None:
             sizer = wx.BoxSizer(wx.HORIZONTAL)
         else:
+            # For some reason, added widgets are appearing in GetChildren
+            # multiple times.  Filter them out for now, investigate more
+            # later.
             for c in window.GetChildren():
                 sizer.Remove(c)
-                c.Hide()
-                oldChildren.append(c)
+                if c is not widget:
+                    c.Hide()
+                    if c not in oldChildren:
+                        oldChildren.append(c)
         sizer.Add(widget,1,wx.EXPAND|wx.ADJUST_MINSIZE)
         widget.Show()
         sizer.Layout()
         window.SetSizer(sizer,False)
         window.Layout()
+        return oldChildren
  
     def replaceInWindow(self,window,widget):
         """As with showInWindow, but destroys the window's previous contents.
@@ -432,8 +443,8 @@ class XRCWidget:
 class XRCPanel(wx.Panel,XRCWidget):
     """wx.Panel with XRCWidget behaviors."""
 
-    def __init__(self,parent,*args):
-        wx.Panel.__init__(self,parent,*args)
+    def __init__(self,parent,id=-1,*args,**kwds):
+        wx.Panel.__init__(self,parent,id,*args,**kwds)
         XRCWidget.__init__(self,parent)
 
     def _getPre(self):
@@ -447,8 +458,8 @@ class XRCPanel(wx.Panel,XRCWidget):
 class XRCFrame(wx.Frame,XRCWidget):
     """wx.Frame with XRCWidget behaviors."""
 
-    def __init__(self,parent,ID=-1,title="Untitled Frame",*args):
-        wx.Frame.__init__(self,parent,ID,title,*args)
+    def __init__(self,parent,id=-1,title="Untitled Frame",*args,**kwds):
+        wx.Frame.__init__(self,parent,id,title,*args,**kwds)
         XRCWidget.__init__(self,parent)
 
     def _getPre(self):
@@ -462,8 +473,8 @@ class XRCFrame(wx.Frame,XRCWidget):
 class XRCDialog(wx.Dialog,XRCWidget):
     """wx.Dialog with XRCWidget behaviors."""
 
-    def __init__(self,parent,*args):
-        wx.Dialog.__init__(self,parent,*args)
+    def __init__(self,parent,id=-1,title="Untitled Dialog",*args,**kwds):
+        wx.Dialog.__init__(self,parent,id,title,*args,**kwds)
         XRCWidget.__init__(self,parent)
 
     def _getPre(self):

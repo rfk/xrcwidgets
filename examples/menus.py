@@ -15,6 +15,9 @@ class MenuFrame(XRCFrame):
     def on_m_file_new_tmpl_activate(self,ctrl):
         print "NEW TEMPLATE"
 
+    def on_m_help_about_activate(self,ctrl):
+        print "SHOWING ABOUT DIALOG..."
+
 
 
 def run():
