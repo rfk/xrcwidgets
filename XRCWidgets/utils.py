@@ -1,3 +1,6 @@
+# Copyright 2004, Ryan Kelly
+# Released under the terms of the wxWindows Licence, version 3.
+# See the file 'lincence/preamble.txt' in the main distribution for details.
 """
 
     XRCWidgets.utils:  Misc utility classes for XRCWidgets framework

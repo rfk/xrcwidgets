@@ -1,7 +1,9 @@
+# Copyright 2004, Ryan Kelly
+# Released under the terms of the wxWindows Licence, version 3.
+# See the file 'lincence/preamble.txt' in the main distribution for details.
 """
 
     XRCWidgets:   GUI Toolkit build around wxPython and the XRC file format
-
 
 XRC is a wxWidgets standard for describing a GUI in an XML file.  This module
 provides facilities to easily incorporate GUI components ('widgets') whose
@@ -44,14 +46,19 @@ class XRCWidget:
     locating the XRC file and loading the definitions from it.
     """
 
-    # Location of the XRC file to load content from
-    # Can be set at class-level in the subclass to force a specific location
-    _xrcfile = None
-
     # Name of the XRC file to load content from
     # Will be searched for along the default XRC file path
     # Set at class-level in the subclass to force a specific name
     _xrcfilename = None
+
+    # Location of the XRC file to load content from
+    # Can be set at class-level in the subclass to force a specific location
+    _xrcfile = None
+
+    # Name of the resource to load from the XRC file, containing definitions
+    # for this object.  Defaults to the name of the class.
+    # Set at class-level to specify a specific name.
+    _xrcname = None
 
     def __init__(self,parent):
         if self._xrcfile is None:
@@ -64,6 +71,7 @@ class XRCWidget:
 
     def _findXRCFile(cls):
         """Locate the XRC file for this class, and return its location.
+
         The name of the XRC file is constructed from the name of the class
         and its defining module.  If this class is named <ClassName> and is
         defined in module <TopLevel>.<SubLevel>.<Package>, then the XRC file
@@ -99,15 +107,23 @@ class XRCWidget:
 
     def _loadXRCFile(self,fileNm,parent):
         """Load this object's definitions from an XRC file.
+
         The file at <fileNm> should be an XRC file containing a resource
         with the same name as this class.  This resource's definition
         will be loaded into the current object using two-stage initialisation,
         abstracted by the object's '_getPre' and '_loadOn' methods.
         <parent> must be the desired parent of the to-be-created widget.
+
+        The class-level attribute _xrcname may be used to specify an alternate
+        name for the resource, rather than the class name.
         """
         self._xrcres = xrc.XmlResource(fileNm)
         pre = self._getPre()
-        self._loadOn(self._xrcres,pre,parent,self.__class__.__name__)
+        if self._xrcname is None:
+            resName = self._xrcname
+        else:
+            resName = self.__class__.__name__
+        self._loadOn(self._xrcres,pre,parent,resName)
         self.PostCreate(pre)
 
     ##  wxPython 2.5 introduces the PostCreate method to wrap a lot
@@ -138,6 +154,7 @@ class XRCWidget:
 
     def createInChild(self,cName,toCreate,*args):
         """Create a Widget inside the named child.
+
         <toCreate> should be a callable (usually a class) returning the widget
         instance. It must take the new widget's parent as first argument. It
         will be called as:
@@ -156,6 +173,7 @@ class XRCWidget:
 
     def showInChild(self,cName,widget):
         """Show the given widget inside the named child.
+
         The widget is expected to have the child as its parent.  It will be
         shown in an expandable sizer as the child's only content.
         """
@@ -169,6 +187,7 @@ class XRCWidget:
 
     def showInWindow(self,window,widget):
         """Show the given widget inside the given window.
+
         The widget is expected to have the window as its parent.  It will be
         shown in an expandable sizer as the windows's only content.
         Any widgets that are currently children of the window will be hidden,
@@ -239,9 +258,10 @@ class XRCWidget:
 
     def _connectAction_Change(self,child,mName):
         """Arrange to call method <mName> when <child>'s value is changed.
+
         The events connected by this method will be different depending on the
         precise type of <child>.  The method to be called should expect the
-        control itself as its only argument.  It will be wrapped so that the
+        control itself as its only argument.  It may be wrapped so that the
         event is skipped in order to avoid a lot of cross-platform issues.
         """
         # retreive the method to be called and wrap it appropriately
@@ -355,6 +375,9 @@ class XRCDialog(wx.Dialog,XRCWidget):
 
 
 def _EvtHandle(toCall,evnt):
+    """Handle an event by invoking <toCall> without arguments.
+    The event itself is ignored.
+    """
     toCall()
 
 def _EvtHandleAndSkip(toCall,evnt):

@@ -1,5 +1,11 @@
 
 
-include examples/*
-include docs/*
+include examples/*.py
+include examples/*.xrc
+
+include docs/*.ps
+include docs/*.pdf
+
+recursive-include tools *
+recursive-include licence *
 
