@@ -14,7 +14,7 @@ NAME = "XRCWidgets"
 
 VER_MAJOR = "0"
 VER_MINOR = "1"
-VER_REL = "4"
+VER_REL = "5"
 VER_PATCH = ""
 
 DESCRIPTION = "XRCWidgets GUI Development Framework"
