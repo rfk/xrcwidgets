@@ -565,7 +565,6 @@ class XRCPanel(wx.Panel,XRCWidget):
     """wx.Panel with XRCWidget behaviors."""
 
     def __init__(self,parent,id=-1,*args,**kwds):
-        wx.Panel.__init__(self,parent,id,*args,**kwds)
         XRCWidget.__init__(self,parent)
 
     def _getPre(self):
@@ -580,7 +579,6 @@ class XRCDialog(wx.Dialog,XRCWidget):
     """wx.Dialog with XRCWidget behaviors."""
 
     def __init__(self,parent,id=-1,title="Untitled Dialog",*args,**kwds):
-        wx.Dialog.__init__(self,parent,id,title,*args,**kwds)
         XRCWidget.__init__(self,parent)
 
     def _getPre(self):
@@ -595,7 +593,6 @@ class XRCFrame(wx.Frame,XRCWidget):
     """wx.Frame with XRCWidget behaviors."""
 
     def __init__(self,parent,id=-1,title="Untitled Frame",*args,**kwds):
-        wx.Frame.__init__(self,parent,id,title,*args,**kwds)
         XRCWidget.__init__(self,parent)
 
     def _getPre(self):
@@ -623,7 +620,6 @@ class XRCApp(XRCFrame):
         XRCFrame.__init__(self,parent,*args,**kwds)
         self.__app = wx.PySimpleApp(0)
         self.__app.SetTopWindow(self)
-        wx.EVT_CLOSE(self,self.OnClose)
 
     def MainLoop(self):
         self.Show()
@@ -631,9 +627,6 @@ class XRCApp(XRCFrame):
 
     def ExitMainLoop(self):
         self.__app.ExitMainLoop()
-
-    def OnClose(self,evnt):
-        self.Destroy()
 
 
 ########
