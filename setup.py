@@ -22,7 +22,7 @@ PACKAGES=['XRCWidgets']
 
 
 setup(name=NAME,
-      version=".".join((VER_MAJOR,VER_MINOR,VER_REL,VER_PATCH)),
+      version="%s.%s%s%s" % (VER_MAJOR,VER_MINOR,VER_REL,VER_PATCH),
       description=DESCRIPTION,
       author=AUTHOR,
       author_email=AUTHOR_EMAIL,
