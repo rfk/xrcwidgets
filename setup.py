@@ -14,8 +14,8 @@ NAME = "XRCWidgets"
 
 VER_MAJOR = "0"
 VER_MINOR = "1"
-VER_REL = "2"
-VER_PATCH = "_alpha1"
+VER_REL = "3"
+VER_PATCH = ""
 
 DESCRIPTION = "XRCWidgets GUI Development Framework"
 AUTHOR = "Ryan Kelly"
