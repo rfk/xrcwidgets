@@ -10,19 +10,14 @@ HOMEPAGE="http://www.rfk.id.au/software/projects/XRCWidgets/"
 
 IUSE=""
 SLOT="0"
-KEYWORDS="~x86"
+KEYWORDS="~x86 ~amd64"
 LICENSE="wxWinLL-3"
 
 DEPEND=">=dev-lang/python-2.3
         >=dev-python/wxpython-2.4.2.4"
 
 src_install() {
-
 	distutils_src_install
-	distutils_python_version
-
 }
-
-
 
 
