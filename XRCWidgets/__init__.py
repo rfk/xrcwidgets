@@ -254,6 +254,8 @@ class XRCWidget:
         # Determine the item label.  If it has a single underscore, remove
         # it as it will be an accelerator key.  If it has more than one,
         # leave it alone. TODO: how does XRC respond in this case?
+        # Also remove anything following a tab, as it's an accelerator
+	# indicator.
         lbl = None
         for c in data.children:
             if isinstance(c,XMLElementData) and c.name == "label":
@@ -264,6 +266,7 @@ class XRCWidget:
         lblParts = lbl.split("_")
         if len(lblParts) == 2:
             lbl = "".join(lblParts)
+        lbl = lbl.split("\t")[0]
 
         # Get and return the widget
         for item in menu.GetMenuItems():
