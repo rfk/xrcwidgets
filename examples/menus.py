@@ -1,10 +1,10 @@
 
 
 from wxPython import wx
-from XRCWidgets import XRCFrame
+from XRCWidgets import XRCApp
 
 
-class MenuFrame(XRCFrame):
+class MenuApp(XRCApp):
 
     def on_m_file_exit_activate(self,ctrl):
         self.Close()
@@ -21,9 +21,6 @@ class MenuFrame(XRCFrame):
 
 
 def run():
-    app = wx.wxPySimpleApp(0)
-    frame = MenuFrame(None)
-    app.SetTopWindow(frame)
-    frame.Show()
+    app = MenuApp()
     app.MainLoop()
 

@@ -1,12 +1,12 @@
 
 from wxPython import wx
 
-from XRCWidgets import XRCFrame, XRCDialog
+from XRCWidgets import XRCApp, XRCDialog
 from demo_widgets import DemoPanel
 
 #  Simple frame to demonstrate the use of menus and toolbar.
 #  Also shows how on_content() can be used to place widgets at creation time.
-class DemoFrame(XRCFrame):
+class DemoApp(XRCApp):
 
     def on_m_file_exit_activate(self,ctrl):
         """Close the application"""
@@ -44,10 +44,7 @@ class AboutDemoDialog(XRCDialog):
 
 # Instantiate and run the application
 def run():
-    app = wx.wxPySimpleApp(0)
-    frame = DemoFrame(None)
-    app.SetTopWindow(frame)
-    frame.Show()
+    app = DemoApp()
     app.MainLoop()
 
 

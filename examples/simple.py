@@ -1,10 +1,10 @@
 
 
 from wxPython import wx
-from XRCWidgets import XRCFrame
+from XRCWidgets import XRCApp
 
 
-class SimpleFrame(XRCFrame):
+class SimpleApp(XRCApp):
 
     def on_message_change(self,msg):
         print "MESSAGE IS NOW:", msg.GetValue()
@@ -15,9 +15,6 @@ class SimpleFrame(XRCFrame):
 
 
 def run():
-    app = wx.wxPySimpleApp(0)
-    frame = SimpleFrame(None)
-    app.SetTopWindow(frame)
-    frame.Show()
+    app = SimpleApp()
     app.MainLoop()
 

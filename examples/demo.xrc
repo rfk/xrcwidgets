@@ -46,7 +46,7 @@
             </object>
         </object>
     </object>
-    <object class="wxFrame" name="DemoFrame">
+    <object class="wxFrame" name="DemoApp">
         <style>wxDEFAULT_FRAME_STYLE</style>
         <title>XRCWidgets Demonstration</title>
         <object class="wxMenuBar" name="DemoFrame_menubar">

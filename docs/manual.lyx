@@ -37,7 +37,7 @@ Ryan Kelly (ryan@rfk.id.au)
 \layout Standard
 
 This document is Copyright 2004, Ryan Kelly.
- Unrestricted verbatim copies may be made and distributed.
+ Verbatim copies may be made and distributed without restriction.
 \layout Section
 
 Introduction
@@ -112,8 +112,8 @@ The XRCWidgets framework allows event handlers to be automatically connected
 Separation of Layout from Code
 \layout Standard
 
-Rapid GUI development is also possible using designers that directly output
- Python or C++ code.
+Rapid GUI development is also possible using design applications that directly
+ output Python or C++ code.
  However, it can be difficult to incorporate this code in an existing applicatio
 n and almost impossible to reverse-engineer the code for further editing.
 \layout Standard
@@ -250,6 +250,32 @@ XRCFrame
 XRCFrame inherits from XRCWidget and wxFrame, implementing the necessary
  functionality to initialise a wxFrame from an XRC resource file.
  It provides no additional methods.
+\layout Subsection
+
+XRCApp
+\layout Standard
+
+XRCFrame inherits from XRCFrame and is designed to provide a shortcut for
+ specifying the main frame of an application.
+ It provides the methods 
+\begin_inset Quotes eld
+\end_inset 
+
+MainLoop
+\begin_inset Quotes erd
+\end_inset 
+
+ and 
+\begin_inset Quotes eld
+\end_inset 
+
+EndMainLoop
+\begin_inset Quotes erd
+\end_inset 
+
+ mirroring those of the wxApp class.
+ When created, it creates a private wxApp class and makes itself the top-level
+ window for the application.
 \layout Section
 
 Tutorials
@@ -264,10 +290,10 @@ The following are a number of quick tutorials to get you started using the
 The Basics
 \layout Standard
 
-This section provides a quick tutorial for creating a widget using the XRCWidget
-s framework.
- The widget in question is to be called 'SimpleFrame', and will live in
- the file 'simple.py'.
+This section provides a quick tutorial for creating an appliction using
+ the XRCWidgets framework.
+ The application will consist of a single widget called 'SimpleApp', and
+ will live in the file 'simple.py'.
  It will consist of a wxFrame with a text-box and a button, which prints
  a message to the terminal when the button is clicked.
  The frame will look something like this:
@@ -319,7 +345,7 @@ Add a Frame
 \begin_inset Quotes eld
 \end_inset 
 
-SimpleFrame
+SimpleApp
 \begin_inset Quotes erd
 \end_inset 
 
@@ -376,10 +402,10 @@ You should now have the file 'simple.xrc'.
 Next, create the python file 'simple.py' using the following code:
 \layout LyX-Code
 
-from XRCWidgets import XRCFrame
+from XRCWidgets import XRCApp
 \layout LyX-Code
 
-class SimpleFrame(XRCFrame):
+class SimpleApp(XRCApp):
 \layout LyX-Code
 
     def on_message_change(self,msg):
@@ -410,7 +436,7 @@ message
 ).GetValue()
 \layout Standard
 
-This code is all that is required to make a functioning frame.
+This code is all that is required to make a functioning application.
  Notice that the defined methods meet the general format of 
 \begin_inset Quotes eld
 \end_inset 
@@ -448,29 +474,17 @@ Once you have the files 'simple.py' and 'simple.xrc' ready, it is possible
  Launch a python shell and execute the following commands:
 \layout LyX-Code
 
-from simple import SimpleFrame
+from simple import SimpleApp
 \layout LyX-Code
 
-from wxPython.wx import *
-\layout LyX-Code
-
-app = wxPySimpleApp(0)
-\layout LyX-Code
-
-frame = SimpleFrame(None)
-\layout LyX-Code
-
-app.SetTopWindow(frame)
-\layout LyX-Code
-
-frame.Show()
+app = SimpleApp()
 \layout LyX-Code
 
 app.MainLoop()
 \layout Standard
 
-This code imports the widget's definition, creates a wxPython application,
- and runs it using SimpleFrame as its top level window.
+This code imports the widget's definition, creates the application and runs
+ the event loop.
  The frame should appear and allow you to interact with it, printing messages
  to the console as the button is clicked or the message text is changed.
 \layout Subsection
