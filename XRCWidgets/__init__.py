@@ -18,6 +18,7 @@ import wx
 from wx import xrc
 
 from XRCWidgets.utils import lcurry, XMLDocTree, XMLElementData
+from XRCWidgets.connectors import getConnectors
 
 
 #  The following seems to work around a wxWidgets bug which is making
@@ -25,7 +26,7 @@ from XRCWidgets.utils import lcurry, XMLDocTree, XMLElementData
 from wxPython import wx as wx2
 _WorkAround_app = wx2.wxPySimpleApp(0)
 del _WorkAround_app
-
+del wx2
 
 
 ########
@@ -163,7 +164,7 @@ class XRCWidget:
             self._xmltree = XMLDocTree(xmlfile)
 
 
-    ##  wxPython 2.5 introduces the PostCreate method to wrap a lot
+    ##  wxPython 2.5 introduces the PostCreate method to wrap some
     ##  of ugliness.  Check the wx version and implement this method
     ##  for versions less than 2.5
     if wx.VERSION[0] <= 2 and not wx.VERSION[1] >= 5:
@@ -256,7 +257,7 @@ class XRCWidget:
         # it as it will be an accelerator key.  If it has more than one,
         # leave it alone. TODO: how does XRC respond in this case?
         # Also remove anything following a tab, as it's an accelerator
-	# indicator.
+        # indicator.
         lbl = None
         for c in data.children:
             if isinstance(c,XMLElementData) and c.name == "label":
@@ -429,137 +430,25 @@ class XRCWidget:
         connections to ensure that such methods are called when appropriate.
         """
         prfx = "on_"
+        connectors = getConnectors()
         for mName in dir(self):
             if mName.startswith(prfx):
-                for action in self._EVT_ACTIONS:
+                for action in connectors:
                     sffx = "_"+action
                     if mName.endswith(sffx):
                         # Method matches magic pattern, hook it up
                         cName = mName[len(prfx):-1*len(sffx)]
-                        handler = getattr(self,mName)
-                        if not callable(handler):
+                        hndlr = getattr(self,mName)
+                        if not callable(hndlr):
                             break
+                        if connectors[action].connect(cName,self,hndlr):
+                            break
+                        else:
+                            eStr = "Widget type <%s> not supported by"
+                            eStr = eStr + " '%s' action."
+                            cType = self.getChildType(cName)
+                            raise XRCWidgetsError(eStr % (cType,action))
 
-                        cnctFuncName = self._EVT_ACTIONS[action]
-                        cnctFunc = getattr(self,cnctFuncName)
-                        cnctFunc(cName,handler)
-                        break
-
-    ##  _EVT_ACTIONS is a dictionary mapping the names of actions to the names
-    ##  of methods of this class that should be used to connect events for
-    ##  that action.  Such methods must take the name of the child in question
-    ##  and the callable object to connect to, and need not return any value.
-
-    _EVT_ACTIONS = {
-                   "change": "_connectAction_Change",
-                   "content": "_connectAction_Content",
-                   "activate": "_connectAction_Activate",
-                   }
-
-
-    def _connectAction_Change(self,cName,handler):
-        """Arrange to call <handler> when widget <cName>'s value is changed.
-
-        The events connected by this method will be different depending on the
-        precise type of <child>.  The handler to be called should expect the
-        control itself as an optional argument, which may or may not be received
-        depending on the type of control.  It may be wrapped so that the
-        event is skipped in order to avoid a lot of cross-platform issues.
-        """
-        cType = self.getChildType(cName)
-
-        # enourmous switch on child widget type
-        # TODO: this would be better implemented using a dictionary
-        if cType == "wxTextCtrl":
-            child = self.getChild(cName)
-            handler = lcurry(handler,child)
-            handler = lcurry(_EvtHandleAndSkip,handler)
-            wx.EVT_TEXT_ENTER(self,child.GetId(),handler)
-            wx.EVT_KILL_FOCUS(child,handler)
-        elif cType == "wxCheckBox":
-            child = self.getChild(cName)
-            handler = lcurry(handler,child)
-            handler = lcurry(_EvtHandle,handler)
-            wx.EVT_CHECKBOX(self,self.getChildId(cName),handler)
-        elif cType == "wxListBox":
-            child = self.getChild(cName)
-            handler = lcurry(handler,child)
-            handler = lcurry(_EvtHandle,handler)
-            wx.EVT_LISTBOX(self,self.getChildId(cName),handler)
-        elif cType == "wxComboBox":
-            child = self.getChild(cName)
-            handler = lcurry(handler,child)
-            handler = lcurry(_EvtHandle,handler)
-            wx.EVT_COMBOBOX(self,self.getChildId(cName),handler)
-            wx.EVT_TEXT_ENTER(self,self.getChildId(cName),handler)
-        elif cType == "wxRadioBox":
-            child = self.getChild(cName)
-            handler = lcurry(handler,child)
-            handler = lcurry(_EvtHandle,handler)
-            wx.EVT_RADIOBOX(self,self.getChildId(cName),handler)
-        elif cType == "wxChoice":
-            child = self.getChild(cName)
-            handler = lcurry(handler,child)
-            handler = lcurry(_EvtHandle,handler)
-            wx.EVT_CHOICE(self,self.getChildId(cName),handler)
-        else:
-            eStr = "Widget type <%s> not supported by 'Change' action."
-            raise XRCWidgetsError(eStr % cType)
-        
-
-
-    def _connectAction_Content(self,cName,handler):
-        """Replace the content of <child> with that returned by method <mName>.
-
-        Strictly, this is not an 'event' handler as it only performs actions
-        on initialisation.  It is however a useful piece of functionality and
-        fits nicely in the framework.  <handler> will be called with the child
-        widget as its only argument, and should return a wxWindow.  This
-        window will be shown as the only content of the child window.
-        """
-        child = self.getChild(cName)
-        widget = handler(child)
-        self.replaceInWindow(child,widget)
-
-
-    def _connectAction_Activate(self,cName,handler):
-        """Arrange to call <handler> when child <cName> is activated.
-        The events connected by this method will be different depending on the
-        precise type of the child.  The method to be called may expect the
-        control itself as a default argument, passed depending on the type
-        of the control.
-        """
-        cType = self.getChildType(cName)
-
-        # enourmous switch on child widget type
-        if cType == "wxButton":
-            child = self.getChild(cName)
-            handler = lcurry(handler,child)
-            handler = lcurry(_EvtHandle,handler)
-            wx.EVT_BUTTON(self,child.GetId(),handler)
-        elif cType == "wxCheckBox":
-            child = self.getChild(cName)
-            handler = lcurry(handler,child)
-            handler = lcurry(_EvtHandle,handler)
-            wx.EVT_CHECKBOX(self,child.GetId(),handler)
-        elif cType == "wxMenuItem":
-            #child = self.getChild(cName)
-            #handler = lcurry(handler,child)
-            #handler = lcurry(_EvtHandle,handler)
-            cID = self.getChildId(cName)
-            wx.EVT_MENU(self,cID,handler)
-        elif cType == "tool":
-            handler = lcurry(_EvtHandle,handler)
-            wx.EVT_MENU(self,self.getChildId(cName),handler)
-        elif cType == "wxListBox":
-            child = self.getChild(cName)
-            handler = lcurry(handler,child)
-            handler = lcurry(_EvtHandle,handler)
-            wx.EVT_LISTBOX_DCLICK(self,self.getChildId(cName),handler)
-        else:
-            eStr = "Widget type <%s> not supported by 'Activate' action."
-            raise XRCWidgetsError(eStr % child.__class__)
-        
 
 
 ########
@@ -636,27 +525,6 @@ class XRCApp(XRCFrame):
     def ExitMainLoop(self):
         self.__app.ExitMainLoop()
 
-
-########
-##
-##  Miscellaneous Useful Functions
-##
-########
-
-
-def _EvtHandle(toCall,evnt):
-    """Handle an event by invoking <toCall> without arguments.
-    The event itself is ignored.
-    """
-    toCall()
-
-def _EvtHandleAndSkip(toCall,evnt):
-    """Handle an event by invoking <toCall> then <evnt>.Skip().
-    This function does *not* pass <evnt> as an argument to <toCall>,
-    it simply invokes it directly.
-    """
-    toCall()
-    evnt.Skip()
 
 
 

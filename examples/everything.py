@@ -20,8 +20,9 @@ class MainFrame(XRCApp):
         # Internal boolean for radio menu items
         self._reportTB = False
         # Set menus to initial values
-        self.getChild("m_edit_reportcb").Check()
-        self.getChild("m_edit_tb").Check()
+        # This is currently broken on my Linux machine...
+        #self.getChild("m_edit_reportcb").Check()
+        #self.getChild("m_edit_tb").Check()
 
     # Popup report frame showing message
     def report(self,msg):
@@ -33,23 +34,23 @@ class MainFrame(XRCApp):
         return SelectPanel(parent)
 
     # Quit application when "Exit" is selected
-    def on_m_file_exit_activate(self,chld):
+    def on_m_file_exit_activate(self,evt):
         self.Close(True)
 
     # Popup the about dialog from the help menu item
-    def on_m_help_about_activate(self,chld):
+    def on_m_help_about_activate(self,evt):
         dlg = AboutDialog(self)
         dlg.ShowModal()
 
     # Switch reporting modes on/off with activations
-    def on_m_edit_reporttb_activate(self,chld):
+    def on_m_edit_reporttb_activate(self,evt):
         self._reportTB = True
-    def on_m_edit_reportcb_activate(self,chld):
+    def on_m_edit_reportcb_activate(self,evt):
         self._reportTB = False
 
     # Enable/Disable editing of textbox contents
-    def on_m_edit_tb_activate(self,chld):
-        self.getChild("text_ctrl").Enable(chld.IsChecked())
+    def on_m_edit_tb_activate(self,evt):
+        self.getChild("text_ctrl").Enable(evt.IsChecked())
 
     # Report value of textbox or combobox when button clicked
     def on_button_activate(self,chld):
@@ -104,7 +105,7 @@ class ReportFrame(XRCFrame):
         XRCFrame.__init__(self,*args,**kwds)
         self.getChild("value_text").SetLabel(msg)
 
-    def on_done_button_activate(self,chld):
+    def on_done_button_activate(self,evt):
         self.Destroy()
 
 

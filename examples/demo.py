@@ -8,11 +8,11 @@ from demo_widgets import DemoPanel
 #  Also shows how on_content() can be used to place widgets at creation time.
 class DemoApp(XRCApp):
 
-    def on_m_file_exit_activate(self,ctrl):
+    def on_m_file_exit_activate(self,evt):
         """Close the application"""
         self.Close()
 
-    def on_m_file_new_activate(self,ctrl):
+    def on_m_file_new_activate(self,evt):
         """Create a new DemoPanel in the display area."""
         dsp = self.getChild("displayarea")
         p = DemoPanel(dsp)
@@ -21,7 +21,7 @@ class DemoApp(XRCApp):
     def on_tb_new_activate(self):
         self.on_m_file_new_activate(None)
 
-    def on_m_help_about_activate(self,ctrl):
+    def on_m_help_about_activate(self,evt):
         """Show the About dialog."""
         dlg = AboutDemoDialog(self)
         dlg.ShowModal()
