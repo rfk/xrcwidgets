@@ -13,7 +13,6 @@ class SimpleApp(XRCApp):
         print self.getChild("message").GetValue()
 
 
-
 def run():
     app = SimpleApp()
     app.MainLoop()
