@@ -20,6 +20,7 @@ from wx import xrc
 from utils import lcurry, XMLDocTree, XMLElementData
 
 
+
 ########
 ##
 ##  Module-Specific Exception Classes
@@ -147,6 +148,14 @@ class XRCWidget:
         self._loadOn(self._xrcres,pre,parent,resName)
         self.PostCreate(pre)
 
+
+    def _makeXmlTree(self):
+        """Populate self._xmltree with a representation of the XRC file."""
+        if self._xmltree is None:
+            xmlfile = file(self._xrcfile)
+            self._xmltree = XMLDocTree(xmlfile)
+
+
     ##  wxPython 2.5 introduces the PostCreate method to wrap a lot
     ##  of ugliness.  Check the wx version and implement this method
     ##  for versions less than 2.5
@@ -168,9 +177,7 @@ class XRCWidget:
         chld = xrc.XRCCTRL(self,cName)
         if chld is None:
             # Find XML data on the named child, if possible
-            if self._xmltree is None:
-                xmlfile = file(self._xrcfile)
-                self._xmltree = XMLDocTree(xmlfile)
+            self._makeXmlTree()
             try:
                 data = self._xmltree.elements[cName]
             except:
@@ -185,6 +192,36 @@ class XRCWidget:
             if chld is None:
                 raise XRCWidgetsError("Child '%s' not found" % (cName,))
         return chld
+
+
+    def getChildId(self,cName):
+        """Obtain the numeric ID of the named child."""
+        id = xrc.XRCID(cName)
+        if id is not None:
+            return id
+        chld = self.getChild(cName)
+        try:
+            return chld.GetId()
+        except AttributeError:
+            pass
+        raise XRCWidgetsError("Child '%s' could not be found" % cName)
+
+
+    def getChildType(self,cName):
+        """Determine the type of the named child.
+        The type is returned as a string, typically the 'class' attribute of
+        the defining element in the XRC file.  For example, "wxTextCtrl" or
+        "wxListBox".
+        """
+        self._makeXmlTree()
+        data = self._xmltree.elements[cName]
+        try:
+            return data.attrs["class"]
+        except KeyError:
+            pass
+        eStr = "Type of child '%s' could not be determined"
+        raise XRCWidgetsError(eStr % (cName,))
+
 
     # The following methods are specially-named so they can be found easily
     # Each is named of the form _getChild_<class> where <class> is the
@@ -376,18 +413,21 @@ class XRCWidget:
                 for action in self._EVT_ACTIONS:
                     sffx = "_"+action
                     if mName.endswith(sffx):
-                        chldName = mName[len(prfx):-1*len(sffx)]
-                        chld = self.getChild(chldName)
+                        # Method matches magic pattern, hook it up
+                        cName = mName[len(prfx):-1*len(sffx)]
+                        handler = getattr(self,mName)
+                        if not callable(handler):
+                            break
+
                         cnctFuncName = self._EVT_ACTIONS[action]
                         cnctFunc = getattr(self,cnctFuncName)
-                        cnctFunc(chld,mName)
+                        cnctFunc(cName,handler)
                         break
 
     ##  _EVT_ACTIONS is a dictionary mapping the names of actions to the names
     ##  of methods of this class that should be used to connect events for
-    ##  that action.  Such methods must take the child widget in question
-    ##  and the name of the method to connect to, and need not return any
-    ##  value.
+    ##  that action.  Such methods must take the name of the child in question
+    ##  and the callable object to connect to, and need not return any value.
 
     _EVT_ACTIONS = {
                    "change": "_connectAction_Change",
@@ -396,62 +436,77 @@ class XRCWidget:
                    }
 
 
-    def _connectAction_Change(self,child,mName):
-        """Arrange to call method <mName> when <child>'s value is changed.
+    def _connectAction_Change(self,cName,handler):
+        """Arrange to call <handler> when widget <cName>'s value is changed.
 
         The events connected by this method will be different depending on the
-        precise type of <child>.  The method to be called should expect the
-        control itself as its only argument.  It may be wrapped so that the
+        precise type of <child>.  The handler to be called should expect the
+        control itself as an optional argument, which may or may not be received
+        depending on the type of control.  It may be wrapped so that the
         event is skipped in order to avoid a lot of cross-platform issues.
         """
-        # retreive the method to be called and wrap it appropriately
-        handler = getattr(self,mName)
-        handler = lcurry(handler,child)
-        handler = lcurry(_EvtHandleAndSkip,handler)
+        cType = self.getChildType(cName)
 
         # enourmous switch on child widget type
-        if isinstance(child,wx.TextCtrl) or isinstance(child,wx.TextCtrlPtr):
+        if cType == "wxTextCtrl":
+            child = self.getChild(cName)
+            handler = lcurry(handler,child)
+            handler = lcurry(_EvtHandleAndSkip,handler)
             wx.EVT_TEXT_ENTER(self,child.GetId(),handler)
             wx.EVT_KILL_FOCUS(child,handler)
-        elif isinstance(child,wx.CheckBox) or isinstance(child,wx.CheckBoxPtr):
-            wx.EVT_CHECKBOX(self,child.GetId(),handler)
+        elif cType == "wxCheckBox":
+            child = self.getChild(cName)
+            handler = lcurry(handler,child)
+            handler = lcurry(_EvtHandle,handler)
+            wx.EVT_CHECKBOX(self,self.getChildId(cName),handler)
         else:
             eStr = "Widget type <%s> not supported by 'Change' action."
-            raise XRCWidgetsError(eStr % child.__class__)
+            raise XRCWidgetsError(eStr % cType)
         
 
 
-    def _connectAction_Content(self,child,mName):
+    def _connectAction_Content(self,cName,handler):
         """Replace the content of <child> with that returned by method <mName>.
 
         Strictly, this is not an 'event' handler as it only performs actions
         on initialisation.  It is however a useful piece of functionality and
-        fits nicely in the framework.  The method <mName> will be called with
-        <child> as its only argument, and should return a wxWindow.  This
-        window will be shown as the only content of <child>.
+        fits nicely in the framework.  <handler> will be called with the child
+        widget as its only argument, and should return a wxWindow.  This
+        window will be shown as the only content of the child window.
         """
-        mthd = getattr(self,mName)
-        widget = mthd(child)
+        child = self.getChild(cName)
+        widget = handler(child)
         self.replaceInWindow(child,widget)
 
 
-    def _connectAction_Activate(self,child,mName):
-        """Arrange to call method <mName> when <child> is activated.
+    def _connectAction_Activate(self,cName,handler):
+        """Arrange to call <handler> when child <cName> is activated.
         The events connected by this method will be different depending on the
-        precise type of <child>.  The method to be called should expect the
-        control itself as its only argument.
+        precise type of the child.  The method to be called may expect the
+        control itself as a default argument, passed depending on the type
+        of the control.
         """
-        handler = getattr(self,mName)
-        handler = lcurry(handler,child)
-        handler = lcurry(_EvtHandle,handler)
+        cType = self.getChildType(cName)
 
         # enourmous switch on child widget type
-        if isinstance(child,wx.Button) or isinstance(child,wx.ButtonPtr):
+        if cType == "wxButton":
+            child = self.getChild(cName)
+            handler = lcurry(handler,child)
+            handler = lcurry(_EvtHandle,handler)
             wx.EVT_BUTTON(self,child.GetId(),handler)
-        elif isinstance(child,wx.CheckBox) or isinstance(child,wx.CheckBoxPtr):
+        elif cType == "wxCheckBox":
+            child = self.getChild(cName)
+            handler = lcurry(handler,child)
+            handler = lcurry(_EvtHandle,handler)
             wx.EVT_CHECKBOX(self,child.GetId(),handler)
-        elif isinstance(child,wx.MenuItem) or isinstance(child,wx.MenuItemPtr):
+        elif cType == "wxMenuItem":
+            child = self.getChild(cName)
+            handler = lcurry(handler,child)
+            handler = lcurry(_EvtHandle,handler)
             wx.EVT_MENU(self,child.GetId(),handler)
+        elif cType == "tool":
+            handler = lcurry(_EvtHandle,handler)
+            wx.EVT_MENU(self,self.getChildId(cName),handler)
         else:
             eStr = "Widget type <%s> not supported by 'Activate' action."
             raise XRCWidgetsError(eStr % child.__class__)

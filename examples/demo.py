@@ -18,11 +18,17 @@ class DemoFrame(XRCFrame):
         p = DemoPanel(dsp)
         self.replaceInWindow(dsp,p)
 
+    def on_tb_new_activate(self):
+        self.on_m_file_new_activate(None)
+
     def on_m_help_about_activate(self,ctrl):
         """Show the About dialog."""
         dlg = AboutDemoDialog(self)
         dlg.ShowModal()
         dlg.Destroy()
+
+    def on_tb_about_activate(self):
+        self.on_m_help_about_activate(None)
 
     def on_displayarea_content(self,ctrl):
         """Initialise display area to contain a DemoPanel."""
