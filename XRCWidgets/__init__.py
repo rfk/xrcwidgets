@@ -330,15 +330,17 @@ class XRCWidget:
         if sizer is None:
             sizer = wx.BoxSizer(wx.HORIZONTAL)
         else:
-            # For some reason, added widgets are appearing in GetChildren
-            # multiple times.  Filter them out for now, investigate more
-            # later.
+            # I dont understand th behavior of GetChildren().  The list appears
+            # to include duplicate entries for children we have created, and
+            # sometimes has links to Dead C++ objects.  Filter out the dead
+            # or repeated entries from the list.
             for c in window.GetChildren():
-                sizer.Remove(c)
-                if c is not widget:
-                    c.Hide()
-                    if c not in oldChildren:
-                        oldChildren.append(c)
+                if c:
+                    sizer.Remove(c)
+                    if c is not widget:
+                        c.Hide()
+                        if c not in oldChildren:
+                            oldChildren.append(c)
         sizer.Add(widget,1,wx.EXPAND|wx.ADJUST_MINSIZE)
         widget.Show()
         sizer.Layout()
@@ -528,17 +530,5 @@ def _EvtHandleAndSkip(toCall,evnt):
     toCall()
     evnt.Skip()
 
-
-def _XMLElemByAttr(reqAttr,reqVal,name,attrs):
-    """Check XML element description for matching attribute.
-    Returns True iff <attrs> contains a key <reqAttr> with value <reqVal>.
-    <name> is ignored.
-    """
-    try:
-        if attrs[reqAttr] == reqVal:
-            return True
-    except KeyError:
-        pass
-    return False
 
 
