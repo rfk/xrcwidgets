@@ -14,7 +14,7 @@ KEYWORDS="~x86"
 LICENSE="wxWinLL-3"
 
 DEPEND=">=dev-lang/python-2.3
-        >=dev-python/wxPython-2.4.2.4"
+        >=dev-python/wxpython-2.4.2.4"
 
 src_install() {
 
