@@ -12,10 +12,7 @@ import os
 
 NAME = "XRCWidgets"
 
-VER_MAJOR = "0"
-VER_MINOR = "1"
-VER_REL = "5"
-VER_PATCH = ""
+from XRCWidgets import VERSION
 
 DESCRIPTION = "XRCWidgets GUI Development Framework"
 AUTHOR = "Ryan Kelly"
@@ -44,7 +41,7 @@ DATA_FILES.append(("share/XRCWidgets/examples",_EXAMPLES))
 
 
 setup(name=NAME,
-      version="%s.%s.%s%s" % (VER_MAJOR,VER_MINOR,VER_REL,VER_PATCH),
+      version=VERSION,
       description=DESCRIPTION,
       author=AUTHOR,
       author_email=AUTHOR_EMAIL,
