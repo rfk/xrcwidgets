@@ -5,7 +5,7 @@
 inherit distutils
 
 DESCRIPTION="XRCWidgets is a rapid GUI development framework for wxPython."
-SRC_URI="http://www.rfk.id.au/software/projects/XRCWidgets/rel_0_1_1_alpha1/XRCWidgets-0.1.1_alpha1.tar.gz"
+SRC_URI="http://www.rfk.id.au/software/projects/XRCWidgets/rel_0_1_4/XRCWidgets-0.1.4.tar.gz"
 HOMEPAGE="http://www.rfk.id.au/software/projects/XRCWidgets/"
 
 IUSE=""
@@ -14,7 +14,7 @@ KEYWORDS="~x86"
 LICENSE="wxWinLL-3"
 
 DEPEND=">=dev-lang/python-2.3
-        >=dev-python/wxPython-2.4.2.4"
+        >=dev-python/wxpython-2.4.2.4"
 
 src_install() {
 

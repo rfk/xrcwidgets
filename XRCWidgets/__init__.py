@@ -456,6 +456,7 @@ class XRCWidget:
         cType = self.getChildType(cName)
 
         # enourmous switch on child widget type
+        # TODO: this would be better implemented using a dictionary
         if cType == "wxTextCtrl":
             child = self.getChild(cName)
             handler = lcurry(handler,child)
@@ -478,6 +479,16 @@ class XRCWidget:
             handler = lcurry(_EvtHandle,handler)
             wx.EVT_COMBOBOX(self,self.getChildId(cName),handler)
             wx.EVT_TEXT_ENTER(self,self.getChildId(cName),handler)
+        elif cType == "wxRadioBox":
+            child = self.getChild(cName)
+            handler = lcurry(handler,child)
+            handler = lcurry(_EvtHandle,handler)
+            wx.EVT_RADIOBOX(self,self.getChildId(cName),handler)
+        elif cType == "wxChoice":
+            child = self.getChild(cName)
+            handler = lcurry(handler,child)
+            handler = lcurry(_EvtHandle,handler)
+            wx.EVT_CHOICE(self,self.getChildId(cName),handler)
         else:
             eStr = "Widget type <%s> not supported by 'Change' action."
             raise XRCWidgetsError(eStr % cType)

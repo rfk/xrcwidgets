@@ -1,3 +1,7 @@
+#
+#  everything.py - large, useless app for demonstrating the functionality
+#                  of the XRCWidgets toolkit
+#
 
 from XRCWidgets import XRCApp, XRCDialog, XRCFrame, XRCPanel
 
@@ -8,6 +12,7 @@ def run():
     app.MainLoop()
 
 
+#  The main application window
 class MainFrame(XRCApp):
 
     def __init__(self,*args,**kwds):
@@ -20,7 +25,8 @@ class MainFrame(XRCApp):
 
     # Popup report frame showing message
     def report(self,msg):
-        print msg
+        frm = ReportFrame(msg,self)
+        frm.Show()
 
     # Show a SelectPanel inside the desired panel
     def on_select_panel_content(self,parent):
@@ -65,6 +71,8 @@ class MainFrame(XRCApp):
     def on_list_box_activate(self,chld):
         self.report(chld.GetStringSelection())
 
+
+# Panel containing some additional widgets
 class SelectPanel(XRCPanel):
 
     def __init__(self,*args,**kwds):
@@ -75,8 +83,28 @@ class SelectPanel(XRCPanel):
     def on_checkbox_change(self,chld):
         self.getChild("radio_box").Enable(chld.IsChecked())
 
+    # Print radiobox selections to the screen
+    def on_radio_box_change(self,chld):
+        print "RADIOBOX HAS SELECTED:", chld.GetStringSelection()
 
+    # Simialr for the wxChoice
+    def on_choice_change(self,chld):
+        print "CHOICE HAS SELECTED:", chld.GetStringSelection()
+
+
+# Simple static about dialog
 class AboutDialog(XRCDialog):
     pass
+
+
+# Popup Frame for reporting Values
+class ReportFrame(XRCFrame):
+
+    def __init__(self,msg,*args,**kwds):
+        XRCFrame.__init__(self,*args,**kwds)
+        self.getChild("value_text").SetLabel(msg)
+
+    def on_done_button_activate(self,chld):
+        self.Destroy()
 
 
