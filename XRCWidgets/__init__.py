@@ -15,6 +15,8 @@ import os
 import wx
 from wx import xrc
 
+from utils import lcurry
+
 
 ########
 ##
@@ -46,6 +48,7 @@ class XRCWidget:
     def __init__(self,parent):
         self._xrcfile = self._findXRCFile()
         self._loadXRCFile(self._xrcfile,parent)
+        self._connectEventMethods()
 
 
     ##  Methods for dealing with XRC resource files
@@ -88,7 +91,7 @@ class XRCWidget:
         with the same name as this class.  This resource's definition
         will be loaded into the current object using two-stage initialisation,
         abstracted by the object's '_getPre' and '_loadOn' methods.
-        <parent> must be the parent of the to-be-created widget.
+        <parent> must be the desired parent of the to-be-created widget.
         """
         self._xrcres = xrc.XmlResource(fileNm)
         pre = self._getPre()
@@ -104,7 +107,9 @@ class XRCWidget:
             self._setOORInfo(self)
 
 
+    ##
     ##  Methods for manipulating child widgets
+    ##
 
     def _getChildName(self,cName):
         """This method allows name-mangling to be inserted, if required."""
@@ -180,6 +185,69 @@ class XRCWidget:
             c.Destroy()
 
 
+    ##
+    ##  Methods for helping to connect event handlers
+    ##
+
+    def _connectEventMethods(self):
+        """Automatically connect specially named methods as event handlers.
+
+        An XRCWidget subclass may provide any number of methods named in the
+        form 'on_<cname>_<action>' where <cname> is the name of a child
+        widget from the XRC file and <action> is an event identifier appropiate
+        for that widget type.  This method sets up the necessary event
+        connections to ensure that such methods are called when appropriate.
+        """
+        prfx = "on_"
+        for mName in dir(self):
+            if mName.startswith(prfx):
+                for action in self._EVT_ACTIONS:
+                    sffx = "_"+action
+                    if mName.endswith(sffx):
+                        chldName = mName[len(prfx):-1*len(sffx)]
+                        chld = self.getChild(chldName)
+                        cnctFuncName = self._EVT_ACTIONS[action]
+                        cnctFunc = getattr(self,cnctFuncName)
+                        cnctFunc(chld,mName)
+                        break
+
+    ##  _EVT_ACTIONS is a dictionary mapping the names of actions to the names
+    ##  of methods of this class that should be used to connect events for
+    ##  that action.  Such methods must take the child widget in question
+    ##  and the name of the method to connect to, and need not return any
+    ##  value.
+
+    _EVT_ACTIONS = {
+                   "change": "_connectAction_Change",
+                   "content": "_connectAction_Content",
+                   }
+
+
+    def _connectAction_Change(self,chld,mName):
+        """Arrange to call method <mName> when <chld>'s value is changed.
+        The events connected by this method will be different depending on the
+        precise type of <chld>.  The method to be called should expect the
+        control itself as its only argument.  It will be wrapped so that the
+        event is skipped in order to avoid a lot of cross-platform issues.
+        """
+        # retreive the method to be called and wrap it appropriately
+        handler = getattr(self,mName)
+        handler = lcurry(handler,chld)
+        handler = lcurry(_EvtHandleAndSkip,handler)
+
+        # enourmous switch on child widget type
+        if isinstance(chld,wx.TextCtrl) or isinstance(chld,wx.TextCtrlPtr):
+            EVT_TEXT_ENTER(self,ctrl.GetId(),handler)
+            EVT_KILL_FOCUS(ctrl,handler)
+        elif isinstance(chld,wx.CheckBox) or isinstance(chld,wx.CheckBoxPtr):
+            EVT_CHECKBOX(self,ctrl.GetId(),handler)
+        elif isinstance(chld,wx.CheckBox) or isinstance(chld,wx.CheckBoxPtr):
+            pass
+        else:
+            eStr = "Widget type not supported by 'Change' action."
+            raise XRCWidgetsError(eStr)
+        
+
 
 ########
 ##
@@ -230,5 +298,21 @@ class XRCDialog(wx.Dialog,XRCWidget):
 
     def _loadOn(self,XRCRes,pre,parent,nm):
         return XRCRes.LoadOnDialog(pre,parent,nm)
+
+
+########
+##
+##  Miscellaneous Useful Functions
+##
+########
+
+def _EvtHandleAndSkip(toCall,evnt):
+    """Handle an event by invoking <toCall> then <evnt>.Skip().
+    This function does *not* pass <evnt> as an argument to <toCall>,
+    it simply invokes it directly.
+    """
+    toCall()
+    evnt.Skip()
+
 
 
