@@ -4,5 +4,4 @@
         * toolbars
 
     * implement events for the current widget, perhaps using 'self'
-        * make XRCApp automatically connect on_self_close to destroy
 
