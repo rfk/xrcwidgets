@@ -97,12 +97,87 @@ class XRCWidget:
 
     ##  wxPython 2.5 introduces the PostCreate method to wrap a lot
     ##  of ugliness.  Check the wx version and implement this method
-    ##  for earlier version.
+    ##  for versions less than 2.5
     if wx.VERSION[0] <= 2 and not wx.VERSION[1] >= 5:
         def PostCreate(self,pre):
             self.this = pre.this
             self._setOORInfo(self)
-        
+
+
+    ##  Methods for manipulating child widgets
+
+    def _getChildName(self,cName):
+        """This method allows name-mangling to be inserted, if required."""
+        return cName
+
+
+    def getChild(self,cName):
+        """Lookup and return a child widget by name."""
+        chld = xrc.XRCCTRL(self,self._getChildName(cName))
+        if chld is None:
+            raise XRCWidgetsError("Child '%s' not found" % (cName,))
+
+
+    def createInChild(self,cName,toCreate,*args):
+        """Create a Widget inside the named child.
+        <toCreate> should be a callable returning the widget instance (usually
+        its class) that takes the new widget's parent as first argument. It
+        will be called as:
+
+            toCreate(self.getChild(cName),*args)
+
+        The newly created widget will be displayed as the only content of the
+        named child, expanded inside a sizer.  A reference to it will also be
+        returned.
+        """
+        chld = self.getChild(cName)
+        newWidget = toCreate(chld,*args)
+        self.showInWindow(chld,newWidget)
+        return newWidget
+
+
+    def showInChild(self,cName,widget):
+        """Show the given widget inside the named child.
+        The widget is expected to have the child as its parent.  It will be
+        shown in an expandable sizer as the child's only content.
+        """
+        self.showInWindow(self.getChild(cName),widget)
+
+
+    def replaceInChild(self,cName,widget):
+        """As with showInChild, but destroys the child's previous contents."""
+        self.replaceInWindow(self.getChild(cName),widget)
+
+
+    def showInWindow(self,window,widget):
+        """Show the given widget inside the given window.
+        The widget is expected to have the window as its parent.  It will be
+        shown in an expandable sizer as the windows's only content.
+        Any widgets that are currently children of the window will be hidden,
+        and a list of references to them will be returned.
+        """
+        oldChildren = []
+        sizer = window.GetSizer()
+        if sizer is None:
+            sizer = wx.BoxSizer(wx.HORIZONTAL)
+        else:
+            for c in window.GetChildren():
+                sizer.Remove(c)
+                c.Hide()
+                oldChildren.append(c)
+        sizer.Add(widget,1,wx.EXPAND|wx.ADJUST_MINSIZE)
+        widget.Show()
+        sizer.Layout()
+        window.SetSizer(sizer,False)
+        window.Layout()
+ 
+    def replaceInWindow(self,window,widget):
+        """As with showInWindow, but destroys the window's previous contents.
+        Does not return a list of references.
+        """
+        oldChildren = self.showInWindow(window,widget)
+        for c in oldChildren:
+            c.Destroy()
 
 
 
