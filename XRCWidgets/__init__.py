@@ -119,7 +119,7 @@ class XRCWidget:
         """
         self._xrcres = xrc.XmlResource(fileNm)
         pre = self._getPre()
-        if self._xrcname is None:
+        if self._xrcname is not None:
             resName = self._xrcname
         else:
             resName = self.__class__.__name__

@@ -252,7 +252,10 @@ XRCFrame inherits from XRCWidget and wxFrame, implementing the necessary
  It provides no additional methods.
 \layout Section
 
-Tutorial
+Tutorials
+\layout Subsection
+
+The Basics
 \layout Standard
 
 This section provides a quick tutorial for creating a widget using the XRCWidget
@@ -281,7 +284,7 @@ It will be necessary to create two files: 'simple.py' containing the python
 
 For additional examples of the toolkit in action, see the 'examples' directory
  of the distribution.
-\layout Subsection
+\layout Subsubsection
 
 Creating the XRC File
 \layout Standard
@@ -357,7 +360,7 @@ xrc2wxg
 \end_inset 
 
  which can convert from the XRC file to a wxGlade project file.
-\layout Subsection
+\layout Subsubsection
 
 Creating the Python Code
 \layout Standard
@@ -433,7 +436,7 @@ on_ok_activate
 \end_inset 
 
  will be called whenever the button is clicked.
-\layout Subsection
+\layout Subsubsection
 
 Testing the Widget
 \layout Standard
@@ -468,6 +471,32 @@ This code imports the widget's definition, creates a wxPython application,
  and runs it using SimpleFrame as its top level window.
  The frame should appear and allow you to interact with it, printing messages
  to the console as the button is clicked or the message text is changed.
+\layout Subsection
+
+Creating a Menu Bar
+\layout Standard
+
+This tutorial is yet to be completed.
+ See the files 'menus.py' and menus.xrc' in the examples directory.
+\layout Standard
+
+Quick Guide:
+\layout Itemize
+
+Create a frame as usual, and select the 'Has MenuBar' option in its properties.
+ Do *not* create a seperate MenuBar, this wont work.
+\layout Itemize
+
+Edit the menus of the MenuBar to your liking.
+ Ensure that you fill in the 
+\begin_inset Quotes eld
+\end_inset 
+
+name
+\begin_inset Quotes erd
+\end_inset 
+
+ field or the XML will not be generated correctly.
 \layout LyX-Code
 
 \layout LyX-Code
