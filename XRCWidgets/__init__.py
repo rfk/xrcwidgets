@@ -286,6 +286,9 @@ class XRCWidget:
         if lbl is None:
             eStr = "Child '%s' has no label" % (data.attrs["name"],)
             raise XRCWidgetsError(eStr)
+        lblParts = lbl.split("_")
+        if len(lblParts) == 2:
+            lbl = "".join(lblParts)
 
         # Find parent widget, get and return reference
         mData = data.parent
