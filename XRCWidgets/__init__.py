@@ -250,6 +250,7 @@ class XRCWidget:
             eStr = "Child '%s' has incorrect parent" % (data.attrs["name"],)
             raise XRCWidgetsError(eStr)
         menu = self._getChild_wxMenu(mData)
+        print menu, mData.attrs.get("name")
             
         # Determine the item label.  If it has a single underscore, remove
         # it as it will be an accelerator key.  If it has more than one,
@@ -267,6 +268,7 @@ class XRCWidget:
         if len(lblParts) == 2:
             lbl = "".join(lblParts)
         lbl = lbl.split("\t")[0]
+        print "LOOKING FOR MENU ITEM:", lbl
 
         # Get and return the widget
         for item in menu.GetMenuItems():
@@ -292,6 +294,7 @@ class XRCWidget:
         lblParts = lbl.split("_")
         if len(lblParts) == 2:
             lbl = "".join(lblParts)
+        print "LOOKING FOR MENU:", lbl
 
         # Find parent widget, get and return reference
         mData = data.parent
@@ -305,6 +308,9 @@ class XRCWidget:
             raise XRCWidgetsError(eStr)
         elif cls == "wxMenuBar":
             menu = self._getChild_wxMenuBar(mData)
+            print "FOUND MENU BAR:", menu
+            print menu.GetMenuCount()
+            print menu.FindMenu(lbl)
             return menu.GetMenu(menu.FindMenu(lbl))
         else:
             eStr = "Child '%s' has incorrect parent" % (data.attrs["name"],)
@@ -325,7 +331,8 @@ class XRCWidget:
             return mbar
         parent = self.getChild(data.parent.attrs["name"])
         try:
-            return parent.GetMenuBar()
+            mbar = parent.GetMenuBar()
+            return mbar
         except AttributeError:
             eStr = "Child '%s' unreachable from parent." % (cName,)
             raise XRCWidgetsError(eStr)
@@ -536,10 +543,11 @@ class XRCWidget:
             handler = lcurry(_EvtHandle,handler)
             wx.EVT_CHECKBOX(self,child.GetId(),handler)
         elif cType == "wxMenuItem":
-            child = self.getChild(cName)
-            handler = lcurry(handler,child)
-            handler = lcurry(_EvtHandle,handler)
-            wx.EVT_MENU(self,child.GetId(),handler)
+            #child = self.getChild(cName)
+            #handler = lcurry(handler,child)
+            #handler = lcurry(_EvtHandle,handler)
+            cID = self.getChildId(cName)
+            wx.EVT_MENU(self,cID,handler)
         elif cType == "tool":
             handler = lcurry(_EvtHandle,handler)
             wx.EVT_MENU(self,self.getChildId(cName),handler)

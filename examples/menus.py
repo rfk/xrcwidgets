@@ -10,6 +10,7 @@ class MenuApp(XRCApp):
         self.Close()
 
     def on_m_file_new_doc_activate(self,ctrl):
+        print self.getChild("m_file_new_doc").GetLabel()
         print "NEW DOCUMENT"
 
     def on_m_file_new_tmpl_activate(self,ctrl):
