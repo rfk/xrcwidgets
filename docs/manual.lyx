@@ -439,10 +439,10 @@ Once you have the files 'simple.py' and 'simple.xrc' ready, it is possible
  Launch a python shell and execute the following commands:
 \layout LyX-Code
 
-from wxPython.wx import *
+from simple import SimpleFrame
 \layout LyX-Code
 
-from simple import SimpleFrame
+from wxPython.wx import *
 \layout LyX-Code
 
 app = wxPySimpleApp(0)
