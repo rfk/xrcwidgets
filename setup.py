@@ -20,6 +20,10 @@ URL="http://www.rfk.id.au/"
 PACKAGES=['XRCWidgets']
 
 
+DATA_FILES=[('share/XRCWidgets/examples',['examples/simple.py','examples/simple.xrc']),
+            ('share/XRCWidgets/docs',['docs/manual.pdf','docs/manual.ps']),
+           ]
+
 
 setup(name=NAME,
       version="%s.%s%s%s" % (VER_MAJOR,VER_MINOR,VER_REL,VER_PATCH),
@@ -28,4 +32,5 @@ setup(name=NAME,
       author_email=AUTHOR_EMAIL,
       url=URL,
       packages=PACKAGES,
+      data_files=DATA_FILES,
      )
