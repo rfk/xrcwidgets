@@ -617,6 +617,7 @@ class XRCApp(XRCFrame):
         XRCFrame.__init__(self,parent,*args,**kwds)
         self.__app = wx.PySimpleApp(0)
         self.__app.SetTopWindow(self)
+        wx.EVT_CLOSE(self,self.OnClose)
 
     def MainLoop(self):
         self.Show()
@@ -624,6 +625,9 @@ class XRCApp(XRCFrame):
 
     def ExitMainLoop(self):
         self.__app.ExitMainLoop()
+
+    def OnClose(self,evnt):
+        self.Destroy()
 
 
 ########
