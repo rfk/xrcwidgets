@@ -5,7 +5,7 @@ from XRCWidgets import XRCFrame, XRCDialog
 from demo_widgets import DemoPanel
 
 #  Simple frame to demonstrate the use of menus and toolbar.
-#  Also shows how on__content() can be used to place widgets at creation time.
+#  Also shows how on_content() can be used to place widgets at creation time.
 class DemoFrame(XRCFrame):
 
     def on_m_file_exit_activate(self,ctrl):

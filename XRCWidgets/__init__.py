@@ -17,7 +17,7 @@ import os
 import wx
 from wx import xrc
 
-from utils import lcurry, findElementData, XMLElementData
+from utils import lcurry, XMLDocTree, XMLElementData
 
 
 ########
@@ -60,11 +60,32 @@ class XRCWidget:
     # Set at class-level to specify a specific name.
     _xrcname = None
 
+    # Whether not not to look for any connect methods with magic names of
+    # the form on_<name>_<action>.  Set to false to make initialisation
+    # quicker.
+    _useMagicMethods = True
+
+
     def __init__(self,parent):
+        # Attribute initialisation
+        self._xmltree = None
+
+        # XRC resource loading
         if self._xrcfile is None:
             self._xrcfile = self._findXRCFile()
         self._loadXRCFile(self._xrcfile,parent)
-        self._connectEventMethods()
+        if self._useMagicMethods:
+            self._connectEventMethods()
+
+
+    def compact(self):
+        """Reduce memory/resource usage of the widget.
+        This method is called automatically after initialisation to drop
+        references to unneeded resources.  These may be accumulated as
+        as time goes on, so this method may be called manually to release
+        them if they are causing a problem.
+        """
+        self._xmltree = None
 
 
     ##  Methods for dealing with XRC resource files
@@ -147,10 +168,12 @@ class XRCWidget:
         chld = xrc.XRCCTRL(self,cName)
         if chld is None:
             # Find XML data on the named child, if possible
-            xmlfile = file(self._xrcfile)
-            checker = lcurry(_XMLElemByAttr,"name",cName)
-            data = findElementData(xmlfile,checker)
-            if data is None:
+            if self._xmltree is None:
+                xmlfile = file(self._xrcfile)
+                self._xmltree = XMLDocTree(xmlfile)
+            try:
+                data = self._xmltree.elements[cName]
+            except:
                 raise XRCWidgetsError("Child '%s' not found" % (cName,))
             # Determine object class, pass data off to appropriate method
             mthdNm = "_getChild_%s" % (data.attrs["class"],)

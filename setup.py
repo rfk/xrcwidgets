@@ -8,6 +8,7 @@
 #
 
 from distutils.core import setup
+import os
 
 NAME = "XRCWidgets"
 
@@ -25,16 +26,7 @@ URL="http://www.rfk.id.au/software/projects/XRCWidgets/"
 PACKAGES=['XRCWidgets']
 
 
-DATA_FILES=[('share/XRCWidgets/examples',
-                    ['examples/simple.py',
-                     'examples/simple.xrc',
-                     'examples/demo.py',
-                     'examples/demo.xrc',
-                     'examples/demo_widgets.py',
-                     'examples/demo_widgets.xrc',
-                     'examples/menus.py',
-                     'examples/menus.xrc']),
-            ('share/XRCWidgets/docs',
+DATA_FILES=[('share/XRCWidgets/docs',
                     ['docs/manual.pdf',
                      'docs/manual.ps']),
             ('share/XRCWidgets/docs/licence',
@@ -43,6 +35,12 @@ DATA_FILES=[('share/XRCWidgets/examples',
                      'licence/licendoc.txt',
                      'licence/preamble.txt']),
            ]
+# Locate and include all files in the 'examples' directory
+_EXAMPLES = []
+for eName in os.listdir("examples"):
+    if eName.endswith(".py") or eName.endswith(".xrc"):
+        _EXAMPLES.append("examples/%s" % eName)
+DATA_FILES.append(("share/XRCWidgets/examples",_EXAMPLES))
 
 
 setup(name=NAME,

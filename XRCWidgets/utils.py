@@ -57,10 +57,12 @@ class rcurry(_curry):
 
 from xml.parsers import expat
 
-class XMLElementData:
-    """Represents information about an element gleaned from an XML file.
+class XMLNameError(Exception): pass
 
-    This class represents an XML element as as much information as needed
+class XMLElementData:
+    """Represents information about an element obtained from an XML file.
+
+    This class represents an XML element and as much information as needed
     about from the containing XML file.  The important attribues are:
 
         * name:      name of XML element
@@ -81,38 +83,30 @@ class XMLElementData:
         self.children = []
 
 
-def findElementData(xmlfile,checker):
-    """Create and return XMLElemenetData for the requested element.
+class XMLDocTree:
+    """Represents an XML document as a tree of XMLElementData objects.
 
-    This function parses the file-like object <xmlfile> in search of a
-    particule XML element.  The callable object <checker> will be called
-    with the arguments (<name>,<attrs>) for each element processed, and
-    must return True only if that element matches the one being searched for.
-    The result is returned as an XMLElementData object.
-    """
-    parser = expat.ParserCreate()
-    handler = _ElementHandler(checker)
-    parser.StartElementHandler = handler.onStart
-    parser.EndElementHandler = handler.onEnd
-    parser.CharacterDataHandler = handler.onCdata
-    parser.ParseFile(xmlfile)
-    return handler.getElement()
-
-
-class _ElementHandler:
-    """Private handlers for XML parsing with <findElementData>.
-
-    This class provides methods <onStart>, <onEnd> and <onCdata> which can be
-    used for the parsing event handlers.
+    This class provides the attribute 'root' which is the root XML
+    element, and the dictionary 'elements' which maps values of the XML
+    attribute "name" to the XMLElementData object for the corresponding
+    element.
     """
 
-    ## TODO: only keep the parts of the tree that are needed
+    def __init__(self,xmlfile):
+        """XMLDocTree initialiser.
+        A file-like object containing the XML data must be given.
+        """
 
-    def __init__(self,checker):
-        "Constructor. <checker> must be search element identifying function."
-        self._checker = checker
+        self.root = None
         self._curElem = None
-        self._theElem = None
+        self.elements = {}
+
+        parser = expat.ParserCreate()
+        parser.StartElementHandler = self.onStart
+        parser.EndElementHandler = self.onEnd
+        parser.CharacterDataHandler = self.onCdata
+        parser.ParseFile(xmlfile)
+
 
     def onStart(self,name,attrs):
         data = XMLElementData()
@@ -122,20 +116,34 @@ class _ElementHandler:
         if self._curElem is not None:
             self._curElem.children.append(data)
         self._curElem = data
-        if self._theElem is None:
-            if self._checker(name,attrs):
-                self._theElem = data
+        try:
+            nm = attrs["name"]
+            if self.elements.has_key(nm):
+                raise XMLNameError("Duplicate element name: '%s'" % (nm,))
+            self.elements[nm] = data
+        except KeyError:
+            pass
+
 
     def onEnd(self,name):
-        self._curElem = self._curElem.parent
+        if self._curElem.parent is not None:
+            self._curElem = self._curElem.parent
+        else:
+            self.root = self._curElem
+            self._curElem = None
 
     def onCdata(self,cdata):
         cdata = cdata.strip()
         if cdata != "":
-            self._curElem.children.append(cdata)
+            # Append CData to previous child if it was also CData
+            if len(self._curElem.children) == 0:
+                self._curElem.children.append(cdata)
+            else:
+                prevChild = self._curElem.children[-1]
+                if not isinstance(prevChild,XMLElementData):
+                    self._curElem.children[-1] = "%s %s" % (prevChild,cdata)
+                else:
+                    self._curElem.children.append(cdata)
 
-    def getElement(self):
-        """Called to retreive element data after parsing."""
-        return self._theElem
 
 
