@@ -17,7 +17,7 @@ import os
 import wx
 from wx import xrc
 
-from utils import lcurry, XMLDocTree, XMLElementData
+from XRCWidgets.utils import lcurry, XMLDocTree, XMLElementData
 
 
 #  The following seems to work around a wxWidgets bug which is making
@@ -235,6 +235,7 @@ class XRCWidget:
     # requested object's class attribute from the XRC file.  Each will
     # accept an XMLElementData object describing the requested widget and
     # will attempt to return a reference to it.
+
 
     def _getChild_wxMenuItem(self,data):
         """Get a reference to a wxMenuItem widget.
@@ -466,6 +467,17 @@ class XRCWidget:
             handler = lcurry(handler,child)
             handler = lcurry(_EvtHandle,handler)
             wx.EVT_CHECKBOX(self,self.getChildId(cName),handler)
+        elif cType == "wxListBox":
+            child = self.getChild(cName)
+            handler = lcurry(handler,child)
+            handler = lcurry(_EvtHandle,handler)
+            wx.EVT_LISTBOX(self,self.getChildId(cName),handler)
+        elif cType == "wxComboBox":
+            child = self.getChild(cName)
+            handler = lcurry(handler,child)
+            handler = lcurry(_EvtHandle,handler)
+            wx.EVT_COMBOBOX(self,self.getChildId(cName),handler)
+            wx.EVT_TEXT_ENTER(self,self.getChildId(cName),handler)
         else:
             eStr = "Widget type <%s> not supported by 'Change' action."
             raise XRCWidgetsError(eStr % cType)
@@ -514,6 +526,11 @@ class XRCWidget:
         elif cType == "tool":
             handler = lcurry(_EvtHandle,handler)
             wx.EVT_MENU(self,self.getChildId(cName),handler)
+        elif cType == "wxListBox":
+            child = self.getChild(cName)
+            handler = lcurry(handler,child)
+            handler = lcurry(_EvtHandle,handler)
+            wx.EVT_LISTBOX_DCLICK(self,self.getChildId(cName),handler)
         else:
             eStr = "Widget type <%s> not supported by 'Activate' action."
             raise XRCWidgetsError(eStr % child.__class__)
