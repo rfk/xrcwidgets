@@ -17,7 +17,7 @@ import os
 import wx
 from wx import xrc
 
-from utils import lcurry
+from utils import lcurry, findElementData, XMLElementData
 
 
 ########
@@ -136,21 +136,125 @@ class XRCWidget:
 
 
     ##
-    ##  Methods for manipulating child widgets
+    ##  Methods for obtaining references to child widgets
     ##
-
-    def _getChildName(self,cName):
-        """This method allows name-mangling to be inserted, if required."""
-        return cName
-
 
     def getChild(self,cName):
         """Lookup and return a child widget by name."""
-        chld = xrc.XRCCTRL(self,self._getChildName(cName))
+        # This can be done in two ways.  Hopefully, the child has been
+        # picked up by xrc and can be obtained using XRCCTRL().
+        # If not, parse the XRC file ourselves and try to find it
+        chld = xrc.XRCCTRL(self,cName)
         if chld is None:
-            raise XRCWidgetsError("Child '%s' not found" % (cName,))
+            # Find XML data on the named child, if possible
+            xmlfile = file(self._xrcfile)
+            checker = lcurry(_XMLElemByAttr,"name",cName)
+            data = findElementData(xmlfile,checker)
+            if data is None:
+                raise XRCWidgetsError("Child '%s' not found" % (cName,))
+            # Determine object class, pass data off to appropriate method
+            mthdNm = "_getChild_%s" % (data.attrs["class"],)
+            try:
+                mthd = getattr(self,mthdNm)
+            except AttributeError:
+                raise XRCWidgetsError("Child '%s' of unsupported type"%(cName,))
+            chld = mthd(data)
+            if chld is None:
+                raise XRCWidgetsError("Child '%s' not found" % (cName,))
         return chld
 
+    # The following methods are specially-named so they can be found easily
+    # Each is named of the form _getChild_<class> where <class> is the
+    # requested object's class attribute from the XRC file.  Each will
+    # accept an XMLElementData object describing the requested widget and
+    # will attempt to return a reference to it.
+
+    def _getChild_wxMenuItem(self,data):
+        """Get a reference to a wxMenuItem widget.
+
+        This requires finding the containing wxMenu widget (assumed to be
+        the immediate parent) then looking it up by its label, which if
+        found in the immediate children.
+        """
+        # Get the containing menu
+        mData = data.parent
+        if mData.attrs.get("class") != "wxMenu":
+            eStr = "Child '%s' has incorrect parent" % (data.attrs["name"],)
+            raise XRCWidgetsError(eStr)
+        menu = self._getChild_wxMenu(mData)
+            
+        # Determine the item label
+        lbl = None
+        for c in data.children:
+            if isinstance(c,XMLElementData) and c.name == "label":
+                lbl = c.children[0]
+        if lbl is None:
+            eStr = "Child '%s' has no label" % (data.attrs["name"],)
+            raise XRCWidgetsError(eStr)
+
+        # Get and return the widget
+        for item in menu.GetMenuItems():
+            if item.GetLabel() == lbl:
+                return item
+ 
+
+    def _getChild_wxMenu(self,data):
+        """Get a reference to a wxMenu widget.
+
+        This requires finding the containing widget, which is either a
+        wxMenu or a wxMenuBar, and applying the appropriate method to
+        find the menu by label.
+        """
+        # Determine the item label
+        lbl = None
+        for c in data.children:
+            if isinstance(c,XMLElementData) and c.name == "label":
+                lbl = c.children[0]
+        if lbl is None:
+            eStr = "Child '%s' has no label" % (data.attrs["name"],)
+            raise XRCWidgetsError(eStr)
+
+        # Find parent widget, get and return reference
+        mData = data.parent
+        cls = mData.attrs.get("class")
+        if cls == "wxMenu":
+            menu = self._getChild_wxMenu(mData)
+            for item in menu.GetMenuItems():
+                if item.GetLabel() == lbl:
+                    return item.GetSubMenu()
+            eStr = "Child '%s' has incorrect parent" % (data.attrs["name"],)
+            raise XRCWidgetsError(eStr)
+        elif cls == "wxMenuBar":
+            menu = self._getChild_wxMenuBar(mData)
+            return menu.GetMenu(menu.FindMenu(lbl))
+        else:
+            eStr = "Child '%s' has incorrect parent" % (data.attrs["name"],)
+            raise XRCWidgetsError(eStr)
+ 
+
+    def _getChild_wxMenuBar(self,data):
+        """Get a reference to a wxMenuBar widget.
+
+        This is done in two stages - first by checking whether XRCCTRL
+        has a reference to it, and if not then attempting to obtain it
+        from the parent widget's GetMenuBar() method.
+        This could probably be done more reliablly - suggestions welcome!
+        """
+        cName = data.attrs["name"]
+        mbar = xrc.XRCCTRL(self,cName)
+        if mbar is not None:
+            return mbar
+        parent = self.getChild(data.parent.attrs["name"])
+        try:
+            return parent.GetMenuBar()
+        except AttributeError:
+            eStr = "Child '%s' unreachable from parent." % (cName,)
+            raise XRCWidgetsError(eStr)
+
+
+    ##
+    ##  Methods for manipulating child widgets
+    ##
 
     def createInChild(self,cName,toCreate,*args):
         """Create a Widget inside the named child.
@@ -310,6 +414,8 @@ class XRCWidget:
             wx.EVT_BUTTON(self,child.GetId(),handler)
         elif isinstance(child,wx.CheckBox) or isinstance(child,wx.CheckBoxPtr):
             wx.EVT_CHECKBOX(self,child.GetId(),handler)
+        elif isinstance(child,wx.MenuItem) or isinstance(child,wx.MenuItemPtr):
+            wx.EVT_MENU(self,child.GetId(),handler)
         else:
             eStr = "Widget type <%s> not supported by 'Activate' action."
             raise XRCWidgetsError(eStr % child.__class__)
@@ -388,5 +494,17 @@ def _EvtHandleAndSkip(toCall,evnt):
     toCall()
     evnt.Skip()
 
+
+def _XMLElemByAttr(reqAttr,reqVal,name,attrs):
+    """Check XML element description for matching attribute.
+    Returns True iff <attrs> contains a key <reqAttr> with value <reqVal>.
+    <name> is ignored.
+    """
+    try:
+        if attrs[reqAttr] == reqVal:
+            return True
+    except KeyError:
+        pass
+    return False
 
 

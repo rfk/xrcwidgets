@@ -81,9 +81,9 @@ The XRCWidgets framework has been designed with the primary goal of streamlining
 It is envisaged that XRCWidgets would make an excellent application-prototyping
  platform.
  An initial version of the application can be constructed using Python and
- XRCWidgets, and if final versions required greater efficiency than the
- toolkit can provide then it is a simple matter to convert the XRC files
- into Python or C++ code.
+ XRCWidgets, and if final versions require greater efficiency than the toolkit
+ can provide it is a simple matter to convert the XRC files into Python
+ or C++ code.
 \layout Subsection
 
 Advantages
@@ -96,7 +96,7 @@ Using freely-available XRC editing programs, it is possible to develop a
  quality interface in a fraction of the time it would take to code it by
  hand.
  This interface can be saved into an XRC file and easily integrated with
- the rest of the application
+ the rest of the application.
 \layout Subsubsection
 
 Declarative Event Handling
@@ -115,7 +115,7 @@ Separation of Layout from Code
 Rapid GUI development is also possible using designers that directly output
  Python or C++ code.
  However, it can be difficult to incorporate this code in an existing applicatio
-n and it is almost impossible to reverse-engineer the code for further editing.
+n and almost impossible to reverse-engineer the code for further editing.
 \layout Standard
 
 By contrast, the use of an XRC file means that any design tool can be used
@@ -136,8 +136,8 @@ Compatibility with Standard wxPython Code
 All XRCWidget objects are subclasses of the standard wxPython objects, and
  behave in a compatible way.
  For example, an XRCPanel is identical to a wxPanel except that it has a
- bunch of child widgets created and event handlers connected as it is initialise
-d.
+ collection of child widgets created and event handlers connected as it
+ is initialised.
 \layout Standard
 
 This allows XRCWidgets to mix with hand-coded wxPython widgets, and behavior
@@ -253,6 +253,12 @@ XRCFrame inherits from XRCWidget and wxFrame, implementing the necessary
 \layout Section
 
 Tutorials
+\layout Standard
+
+The following are a number of quick tutorials to get you started using the
+ framework.
+ The code for these tutorials can be found in the 'examles' directory of
+ the source distribution.
 \layout Subsection
 
 The Basics
@@ -262,8 +268,8 @@ This section provides a quick tutorial for creating a widget using the XRCWidget
 s framework.
  The widget in question is to be called 'SimpleFrame', and will live in
  the file 'simple.py'.
- We will create a wxFrame with a text-box and a button, which prints a message
- to the terminal when the button is clicked.
+ It will consist of a wxFrame with a text-box and a button, which prints
+ a message to the terminal when the button is clicked.
  The frame will look something like this:
 \layout Standard
 \added_space_top smallskip \added_space_bottom smallskip \align center 
@@ -280,10 +286,6 @@ s framework.
 
 It will be necessary to create two files: 'simple.py' containing the python
  code, and 'simple.xrc' containing the XRC definitions.
-\layout Standard
-
-For additional examples of the toolkit in action, see the 'examples' directory
- of the distribution.
 \layout Subsubsection
 
 Creating the XRC File
@@ -473,7 +475,7 @@ This code imports the widget's definition, creates a wxPython application,
  to the console as the button is clicked or the message text is changed.
 \layout Subsection
 
-Creating a Menu Bar
+A more complicated Frame
 \layout Standard
 
 This tutorial is yet to be completed.
