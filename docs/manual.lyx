@@ -1,0 +1,47 @@
+#LyX 1.3 created this file. For more info see http://www.lyx.org/
+\lyxformat 221
+\textclass article
+\language english
+\inputencoding auto
+\fontscheme default
+\graphics default
+\paperfontsize default
+\papersize Default
+\paperpackage a4
+\use_geometry 0
+\use_amsmath 0
+\use_natbib 0
+\use_numerical_citations 0
+\paperorientation portrait
+\secnumdepth 3
+\tocdepth 3
+\paragraph_separation indent
+\defskip medskip
+\quotes_language english
+\quotes_times 2
+\papercolumns 1
+\papersides 1
+\paperpagestyle default
+
+\layout Title
+
+The XRCWidgets Package
+\layout Author
+
+Ryan Kelly (ryan@rfk.id.au)
+\layout Section
+
+Introduction
+\layout Standard
+
+The XRCWidgets package is a Python extension to the popular wxWidgets library.
+ It is designed to allow the rapid development of graphical applications
+ by leveraging the dynamic run-type capabilities of Python and the XML-based
+ resource specification scheme XRC.
+\layout Standard
+
+XRC is a wxWidgets standard for describing the layout and content of an
+ interface as an XML file.
+ There are many tools available for producing/editing XRC files - the author
+ recommends wxGlade (http://wxglade.sourceforge.net/)
+\the_end

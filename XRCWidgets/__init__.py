@@ -44,9 +44,18 @@ class XRCWidget:
     locating the XRC file and loading the definitions from it.
     """
 
+    # Location of the XRC file to load content from
+    # Can be set at class-level in the subclass to force a specific location
+    _xrcfile = None
+
+    # Name of the XRC file to load content from
+    # Will be searched for along the default XRC file path
+    # Set at class-level in the subclass to force a specific name
+    _xrcfilename = None
 
     def __init__(self,parent):
-        self._xrcfile = self._findXRCFile()
+        if self._xrcfile is None:
+            self._xrcfile = self._findXRCFile()
         self._loadXRCFile(self._xrcfile,parent)
         self._connectEventMethods()
 
@@ -62,7 +71,10 @@ class XRCWidget:
         The locations within the filesystem which are to be searched are
         obtained from the _getXRCFileLocations() method.
         """
-        filePath = "/".join(cls.__module__.split(".")) + ".xrc"
+        if cls._xrcfilename is None:
+            filePath =  "/".join(cls.__module__.split(".")) + ".xrc"
+        else:
+            filePath = self._xrcfilename
         for fileLoc in cls._getXRCFileLocations():
             pth = os.path.join(fileLoc,filePath)
             if os.path.exists(pth):
@@ -81,7 +93,7 @@ class XRCWidget:
         """
         for p in sys.path:
             yield p
-        yield os.normpath(os.join(sys.prefix,"share/XRCWidgets/data"))
+        yield os.path.normpath(os.path.join(sys.prefix,"share/XRCWidgets/data"))
     _getXRCFileLocations = staticmethod(_getXRCFileLocations)
 
 
@@ -121,12 +133,13 @@ class XRCWidget:
         chld = xrc.XRCCTRL(self,self._getChildName(cName))
         if chld is None:
             raise XRCWidgetsError("Child '%s' not found" % (cName,))
+        return chld
 
 
     def createInChild(self,cName,toCreate,*args):
         """Create a Widget inside the named child.
-        <toCreate> should be a callable returning the widget instance (usually
-        its class) that takes the new widget's parent as first argument. It
+        <toCreate> should be a callable (usually a class) returning the widget
+        instance. It must take the new widget's parent as first argument. It
         will be called as:
 
             toCreate(self.getChild(cName),*args)
@@ -220,32 +233,66 @@ class XRCWidget:
     _EVT_ACTIONS = {
                    "change": "_connectAction_Change",
                    "content": "_connectAction_Content",
+                   "activate": "_connectAction_Activate",
                    }
 
 
-    def _connectAction_Change(self,chld,mName):
-        """Arrange to call method <mName> when <chld>'s value is changed.
+    def _connectAction_Change(self,child,mName):
+        """Arrange to call method <mName> when <child>'s value is changed.
         The events connected by this method will be different depending on the
-        precise type of <chld>.  The method to be called should expect the
+        precise type of <child>.  The method to be called should expect the
         control itself as its only argument.  It will be wrapped so that the
         event is skipped in order to avoid a lot of cross-platform issues.
         """
         # retreive the method to be called and wrap it appropriately
         handler = getattr(self,mName)
-        handler = lcurry(handler,chld)
+        handler = lcurry(handler,child)
         handler = lcurry(_EvtHandleAndSkip,handler)
 
         # enourmous switch on child widget type
-        if isinstance(chld,wx.TextCtrl) or isinstance(chld,wx.TextCtrlPtr):
-            EVT_TEXT_ENTER(self,ctrl.GetId(),handler)
-            EVT_KILL_FOCUS(ctrl,handler)
-        elif isinstance(chld,wx.CheckBox) or isinstance(chld,wx.CheckBoxPtr):
-            EVT_CHECKBOX(self,ctrl.GetId(),handler)
-        elif isinstance(chld,wx.CheckBox) or isinstance(chld,wx.CheckBoxPtr):
-            pass
+        if isinstance(child,wx.TextCtrl) or isinstance(child,wx.TextCtrlPtr):
+            wx.EVT_TEXT_ENTER(self,child.GetId(),handler)
+            wx.EVT_KILL_FOCUS(child,handler)
+        elif isinstance(child,wx.CheckBox) or isinstance(child,wx.CheckBoxPtr):
+            wx.EVT_CHECKBOX(self,child.GetId(),handler)
         else:
-            eStr = "Widget type not supported by 'Change' action."
-            raise XRCWidgetsError(eStr)
+            eStr = "Widget type <%s> not supported by 'Change' action."
+            raise XRCWidgetsError(eStr % child.__class__)
+        
+
+
+    def _connectAction_Content(self,child,mName):
+        """Replace the content of <child> with that returned by method <mName>.
+
+        Strictly, this is not an 'event' handler as it only performs actions
+        on initialisation.  It is however a useful piece of functionality and
+        fits nicely in the framework.  The method <mName> will be called with
+        <child> as its only argument, and should return a wxWindow.  This
+        window will be shown as the only content of <child>.
+        """
+        mthd = getattr(self,mName)
+        widget = mthd(child)
+        self.replaceInWindow(child,widget)
+
+
+    def _connectAction_Activate(self,child,mName):
+        """Arrange to call method <mName> when <child> is activated.
+        The events connected by this method will be different depending on the
+        precise type of <child>.  The method to be called should expect the
+        control itself as its only argument.
+        """
+        handler = getattr(self,mName)
+        handler = lcurry(handler,child)
+        handler = lcurry(_EvtHandle,handler)
+
+        # enourmous switch on child widget type
+        if isinstance(child,wx.Button) or isinstance(child,wx.ButtonPtr):
+            wx.EVT_BUTTON(self,child.GetId(),handler)
+        elif isinstance(child,wx.CheckBox) or isinstance(child,wx.CheckBoxPtr):
+            wx.EVT_CHECKBOX(self,child.GetId(),handler)
+        else:
+            eStr = "Widget type <%s> not supported by 'Activate' action."
+            raise XRCWidgetsError(eStr % child.__class__)
         
 
 
@@ -274,8 +321,8 @@ class XRCPanel(wx.Panel,XRCWidget):
 class XRCFrame(wx.Frame,XRCWidget):
     """wx.Frame with XRCWidget behaviors."""
 
-    def __init__(self,parent,*args):
-        wx.Frame.__init__(self,parent,*args)
+    def __init__(self,parent,ID=-1,title="Untitled Frame",*args):
+        wx.Frame.__init__(self,parent,ID,title,*args)
         XRCWidget.__init__(self,parent)
 
     def _getPre(self):
@@ -305,6 +352,10 @@ class XRCDialog(wx.Dialog,XRCWidget):
 ##  Miscellaneous Useful Functions
 ##
 ########
+
+
+def _EvtHandle(toCall,evnt):
+    toCall()
 
 def _EvtHandleAndSkip(toCall,evnt):
     """Handle an event by invoking <toCall> then <evnt>.Skip().
