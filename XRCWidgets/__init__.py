@@ -20,6 +20,13 @@ from wx import xrc
 from utils import lcurry, XMLDocTree, XMLElementData
 
 
+#  The following seems to work around a wxWidgets bug which is making
+#  XRCApp segfault, simply by creating a PySimpleApp.
+from wxPython import wx as wx2
+_WorkAround_app = wx2.wxPySimpleApp(0)
+del _WorkAround_app
+
+
 
 ########
 ##
@@ -233,7 +240,7 @@ class XRCWidget:
         """Get a reference to a wxMenuItem widget.
 
         This requires finding the containing wxMenu widget (assumed to be
-        the immediate parent) then looking it up by its label, which if
+        the immediate parent) then looking it up by its label, which is
         found in the immediate children.
         """
         # Get the containing menu
@@ -535,6 +542,21 @@ class XRCPanel(wx.Panel,XRCWidget):
 
 
 
+class XRCDialog(wx.Dialog,XRCWidget):
+    """wx.Dialog with XRCWidget behaviors."""
+
+    def __init__(self,parent,id=-1,title="Untitled Dialog",*args,**kwds):
+        wx.Dialog.__init__(self,parent,id,title,*args,**kwds)
+        XRCWidget.__init__(self,parent)
+
+    def _getPre(self):
+        return wx.PreDialog()
+
+    def _loadOn(self,XRCRes,pre,parent,nm):
+        return XRCRes.LoadOnDialog(pre,parent,nm)
+
+
+
 class XRCFrame(wx.Frame,XRCWidget):
     """wx.Frame with XRCWidget behaviors."""
 
@@ -549,19 +571,31 @@ class XRCFrame(wx.Frame,XRCWidget):
         return XRCRes.LoadOnFrame(pre,parent,nm)
 
 
+class XRCApp(XRCFrame):
+    """XRCFrame that can act as a standalone application.
+    This class provides a convient way to specify the main frame of
+    an application.  It is equivalent to an XRCFrame, but provides
+    the following additional methods:
 
-class XRCDialog(wx.Dialog,XRCWidget):
-    """wx.Dialog with XRCWidget behaviors."""
+        * MainLoop/ExitMainLoop
 
-    def __init__(self,parent,id=-1,title="Untitled Dialog",*args,**kwds):
-        wx.Dialog.__init__(self,parent,id,title,*args,**kwds)
-        XRCWidget.__init__(self,parent)
+    It thus behaves as a simple combination of a wx.Frame and a wx.App, with
+    the frame coming from the XRC file and being the TopLevelWindow of
+    the application.
+    """
 
-    def _getPre(self):
-        return wx.PreDialog()
+    def __init__(self,*args,**kwds):
+        parent = None
+        XRCFrame.__init__(self,parent,*args,**kwds)
+        self.__app = wx.PySimpleApp(0)
+        self.__app.SetTopWindow(self)
 
-    def _loadOn(self,XRCRes,pre,parent,nm):
-        return XRCRes.LoadOnDialog(pre,parent,nm)
+    def MainLoop(self):
+        self.Show()
+        self.__app.MainLoop()
+
+    def ExitMainLoop(self):
+        self.__app.ExitMainLoop()
 
 
 ########
