@@ -47,3 +47,4 @@ class rcurry(_curry):
         callKwds.update(kwds)
         return self.func(*callArgs,**callKwds)
 
+

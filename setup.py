@@ -20,8 +20,12 @@ URL="http://www.rfk.id.au/"
 PACKAGES=['XRCWidgets']
 
 
-DATA_FILES=[('share/XRCWidgets/examples',['examples/simple.py','examples/simple.xrc']),
-            ('share/XRCWidgets/docs',['docs/manual.pdf','docs/manual.ps']),
+DATA_FILES=[('share/XRCWidgets/examples',
+                    ['examples/simple.py',
+                     'examples/simple.xrc']),
+            ('share/XRCWidgets/docs',
+                    ['docs/manual.pdf',
+                     'docs/manual.ps']),
            ]
 
 
@@ -34,3 +38,4 @@ setup(name=NAME,
       packages=PACKAGES,
       data_files=DATA_FILES,
      )
+
