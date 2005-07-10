@@ -13,6 +13,8 @@ SLOT="0"
 KEYWORDS="~x86 ~amd64"
 LICENSE="wxWinLL-3"
 
+RESTRICT="nomirror"
+
 DEPEND=">=dev-lang/python-2.3
         >=dev-python/wxpython-2.4.2.4"
 

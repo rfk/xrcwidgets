@@ -255,7 +255,7 @@ XRCFrame inherits from XRCWidget and wxFrame, implementing the necessary
 XRCApp
 \layout Standard
 
-XRCFrame inherits from XRCFrame and is designed to provide a shortcut for
+XRCApp inherits from XRCFrame and is designed to provide a shortcut for
  specifying the main frame of an application.
  It provides the methods 
 \begin_inset Quotes eld
@@ -375,7 +375,7 @@ ok
 .
 \layout Standard
 
-When the frame is finished, selected Generate Code from the File menu to
+When the frame is finished, selecte Generate Code from the File menu to
  produce the XRC file.
  You may also like to save the wxGlade Application so that it can be edited
  later.
