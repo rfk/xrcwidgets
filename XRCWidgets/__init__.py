@@ -30,10 +30,10 @@ from XRCWidgets.connectors import getConnectors
 
 #  The following seems to work around a wxWidgets bug which is making
 #  XRCApp segfault, simply by creating a PySimpleApp.
-from wxPython import wx as wx2
-_WorkAround_app = wx2.wxPySimpleApp(0)
-del _WorkAround_app
-del wx2
+#from wxPython import wx as wx2
+#_WorkAround_app = wx2.wxPySimpleApp(0)
+#del _WorkAround_app
+#del wx2
 
 
 ########
@@ -521,8 +521,8 @@ class XRCApp(XRCFrame):
 
     def __init__(self,*args,**kwds):
         parent = None
-        XRCFrame.__init__(self,parent,*args,**kwds)
         self.__app = wx.PySimpleApp(0)
+        XRCFrame.__init__(self,parent,*args,**kwds)
         self.__app.SetTopWindow(self)
 
     def MainLoop(self):
