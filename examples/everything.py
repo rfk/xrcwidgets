@@ -21,8 +21,8 @@ class MainFrame(XRCApp):
         self._reportTB = False
         # Set menus to initial values
         # This is currently broken on my Linux machine...
-        #self.getChild("m_edit_reportcb").Check()
-        #self.getChild("m_edit_tb").Check()
+        self.getChild("m_edit_reportcb").Check()
+        self.getChild("m_edit_tb").Check()
 
     # Popup report frame showing message
     def report(self,msg):
@@ -41,6 +41,13 @@ class MainFrame(XRCApp):
     def on_m_help_about_activate(self,evt):
         dlg = AboutDialog(self)
         dlg.ShowModal()
+
+    def on_t_about_activate(self,evt):
+        dlg = AboutDialog(self)
+        dlg.ShowModal()
+
+    def on_t_report_activate(self,evt):
+        self.report("Reporting from the toolbar!")
 
     # Switch reporting modes on/off with activations
     def on_m_edit_reporttb_activate(self,evt):

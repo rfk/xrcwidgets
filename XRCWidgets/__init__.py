@@ -258,7 +258,6 @@ class XRCWidget:
             eStr = "Child '%s' has incorrect parent" % (data.attrs["name"],)
             raise XRCWidgetsError(eStr)
         menu = self._getChild_wxMenu(mData)
-        print menu, mData.attrs.get("name")
             
         # Determine the item label.  If it has a single underscore, remove
         # it as it will be an accelerator key.  If it has more than one,
@@ -276,7 +275,6 @@ class XRCWidget:
         if len(lblParts) == 2:
             lbl = "".join(lblParts)
         lbl = lbl.split("\t")[0]
-        print "LOOKING FOR MENU ITEM:", lbl
 
         # Get and return the widget
         for item in menu.GetMenuItems():
@@ -302,7 +300,6 @@ class XRCWidget:
         lblParts = lbl.split("_")
         if len(lblParts) == 2:
             lbl = "".join(lblParts)
-        print "LOOKING FOR MENU:", lbl
 
         # Find parent widget, get and return reference
         mData = data.parent
@@ -316,9 +313,6 @@ class XRCWidget:
             raise XRCWidgetsError(eStr)
         elif cls == "wxMenuBar":
             menu = self._getChild_wxMenuBar(mData)
-            print "FOUND MENU BAR:", menu
-            print menu.GetMenuCount()
-            print menu.FindMenu(lbl)
             return menu.GetMenu(menu.FindMenu(lbl))
         else:
             eStr = "Child '%s' has incorrect parent" % (data.attrs["name"],)

@@ -154,7 +154,7 @@ class ActivateConnector(Connector):
         return True
     
     def connect_tool(self,cName,parent,handler):
-        handler = lcurry(_EvtHandle,handler)
+        handler = lcurry(_EvtHandleWithEvt,handler)
         wx.EVT_MENU(parent,parent.getChildId(cName),handler)
         return True
         
