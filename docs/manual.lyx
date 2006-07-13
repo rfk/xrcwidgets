@@ -1,18 +1,19 @@
-#LyX 1.3 created this file. For more info see http://www.lyx.org/
-\lyxformat 221
+#LyX 1.4.1 created this file. For more info see http://www.lyx.org/
+\lyxformat 245
+\begin_document
+\begin_header
 \textclass article
 \language english
 \inputencoding auto
 \fontscheme default
 \graphics default
 \paperfontsize default
-\spacing single 
-\papersize Default
-\paperpackage a4
-\use_geometry 1
-\use_amsmath 0
-\use_natbib 0
-\use_numerical_citations 0
+\spacing single
+\papersize default
+\use_geometry true
+\use_amsmath 1
+\cite_engine basic
+\use_bibtopic false
 \paperorientation portrait
 \leftmargin 2.5cm
 \topmargin 2.5cm
@@ -23,273 +24,329 @@
 \paragraph_separation indent
 \defskip medskip
 \quotes_language english
-\quotes_times 2
 \papercolumns 1
 \papersides 1
 \paperpagestyle default
+\tracking_changes false
+\output_changes true
+\end_header
 
-\layout Title
+\begin_body
 
+\begin_layout Title
 The XRCWidgets Package
-\layout Author
+\end_layout
 
+\begin_layout Author
 Ryan Kelly (ryan@rfk.id.au)
-\layout Standard
+\end_layout
 
-This document is Copyright 2004, Ryan Kelly.
+\begin_layout Standard
+This document is Copyright 2004-06, Ryan Kelly.
  Verbatim copies may be made and distributed without restriction.
-\layout Section
+\end_layout
 
+\begin_layout Section
 Introduction
-\layout Standard
+\end_layout
 
+\begin_layout Standard
 The XRCWidgets package is a Python extension to the popular wxWidgets library.
  It is designed to allow the rapid development of graphical applications
  by leveraging the dynamic run-type capabilities of Python and the XML-based
  resource specification scheme XRC.
-\layout Subsection
+\end_layout
 
+\begin_layout Subsection
 Underlying Technologies
-\layout Itemize
+\end_layout
 
+\begin_layout Itemize
 wxWidgets is a cross-platform GUI toolkit written in C++ 
-\newline 
+\newline
 http://www.wxwidgets.org/
-\layout Itemize
+\end_layout
 
+\begin_layout Itemize
 wxPython is a wxWidgets binding for the Python language
-\newline 
+\newline
 http://www.wxPython.org
-\layout Itemize
+\end_layout
 
+\begin_layout Itemize
 XRC is a wxWidgets standard for describing the layout and content of a GUI
  using an XML file
-\newline 
+\newline
 http://www.wxwidgets.org/manuals/2.4.2/wx478.htm
-\layout Subsection
+\end_layout
 
+\begin_layout Subsection
 Purpose
-\layout Standard
+\end_layout
 
+\begin_layout Standard
 The XRCWidgets framework has been designed with the primary goal of streamlining
  the rapid development of GUI applications using Python.
  The secondary goal is flexibility, so that everything that can be done
  in a normal wxPython application can be done using XRCWidgets.
  Other goals such as efficiency take lower precedence.
-\layout Standard
+\end_layout
 
+\begin_layout Standard
 It is envisaged that XRCWidgets would make an excellent application-prototyping
  platform.
  An initial version of the application can be constructed using Python and
  XRCWidgets, and if final versions require greater efficiency than the toolkit
  can provide it is a simple matter to convert the XRC files into Python
  or C++ code.
-\layout Subsection
+\end_layout
 
+\begin_layout Subsection
 Advantages
-\layout Subsubsection
+\end_layout
 
+\begin_layout Subsubsection
 Rapid GUI Development
-\layout Standard
+\end_layout
 
+\begin_layout Standard
 Using freely-available XRC editing programs, it is possible to develop a
  quality interface in a fraction of the time it would take to code it by
  hand.
  This interface can be saved into an XRC file and easily integrated with
  the rest of the application.
-\layout Subsubsection
+\end_layout
 
+\begin_layout Subsubsection
 Declarative Event Handling
-\layout Standard
+\end_layout
 
+\begin_layout Standard
 The XRCWidgets framework allows event handlers to be automatically connected
  by defining them as specially-named methods of the XRCWidget class.
  This saves the tedium of writing an event handling method and connecting
  it by hand, and allows a number of cross-platform issues to be resolved
  in a single location.
-\layout Subsubsection
+\end_layout
 
+\begin_layout Subsubsection
 Separation of Layout from Code
-\layout Standard
+\end_layout
 
+\begin_layout Standard
 Rapid GUI development is also possible using design applications that directly
  output Python or C++ code.
  However, it can be difficult to incorporate this code in an existing applicatio
 n and almost impossible to reverse-engineer the code for further editing.
-\layout Standard
+\end_layout
 
+\begin_layout Standard
 By contrast, the use of an XRC file means that any design tool can be used
  as long as it understands the standard format.
  There is no tie-in to a particular development toolset.
-\layout Subsubsection
+\end_layout
 
+\begin_layout Subsubsection
 Easy Conversion to Native Code
-\layout Standard
+\end_layout
 
+\begin_layout Standard
 If extra efficiency is required, is is trivial to transform an XRC file
  into Python or C++ code that constructs the GUI natively.
-\layout Subsubsection
+\end_layout
 
+\begin_layout Subsubsection
 Compatibility with Standard wxPython Code
-\layout Standard
+\end_layout
 
+\begin_layout Standard
 All XRCWidget objects are subclasses of the standard wxPython objects, and
  behave in a compatible way.
  For example, an XRCPanel is identical to a wxPanel except that it has a
  collection of child widgets created and event handlers connected as it
  is initialised.
-\layout Standard
+\end_layout
 
+\begin_layout Standard
 This allows XRCWidgets to mix with hand-coded wxPython widgets, and behavior
  that is not implemented by the XRCWidgets framework can be added using
  standard wxPython techniques.
-\layout Subsubsection
+\end_layout
 
+\begin_layout Subsubsection
 Simple Re-sizing of GUI
-\layout Standard
+\end_layout
 
+\begin_layout Standard
 Coding GUIs that look good when resized can be very tedious if done by hand.
  Since XRC is based on sizers for layout, resizing of widgets works automaticall
 y in most cases.
-\layout Section
+\end_layout
 
+\begin_layout Section
 Classes Provided
-\layout Standard
+\end_layout
 
+\begin_layout Standard
 The classes provided by the XRCWidgets framework are detailed below.
-\layout Subsection
+\end_layout
 
+\begin_layout Subsection
 XRCWidgetsError
-\layout Standard
+\end_layout
 
+\begin_layout Standard
 This class inherits from the python built-in Exception class, and is the
  base class for all exceptions that are thrown by XRCWidgets code.
  It behaves in the same way as the standard Exception class.
-\layout Subsection
+\end_layout
 
+\begin_layout Subsection
 XRCWidget
-\layout Standard
+\end_layout
 
+\begin_layout Standard
 The main class provided by the package, XRCWidget is a mix-in that provides
  all of the generic GUI-building and event-connecting functionality.
  It provides the following methods:
-\layout Itemize
+\end_layout
 
+\begin_layout Itemize
 getChild(cName): return a reference to the widget named <cName> in the XRC
  file
-\layout Itemize
+\end_layout
 
+\begin_layout Itemize
 createInChild(cName,toCreate,*args): takes a wxPython widget factory (such
  as a class) and creates an instance of it inside the named child widget.
-\layout Itemize
+\end_layout
 
+\begin_layout Itemize
 showInChild(cName,widget): displays <widget> inside of the named child widget
-\layout Itemize
+\end_layout
 
+\begin_layout Itemize
 replaceInChild(cName,widget): displays <widget> inside the named child widget,
  destroying any of its previous children
-\layout Standard
+\end_layout
 
+\begin_layout Standard
 An XRCWidget subclass may have any number of methods named in the form 
 \begin_inset Quotes eld
-\end_inset 
+\end_inset
 
 on_<child>_<action>
 \begin_inset Quotes erd
-\end_inset 
+\end_inset
 
  which will automatically be connected as event handlers.
  <child> must be the name of a child from the XRC file, and <action> must
  be a valid action that may be performed on that widget.
-\layout Standard
+\end_layout
 
+\begin_layout Standard
 Actions may associate with different events depending on the type of the
  child widget.
  Valid actions include:
-\layout Itemize
+\end_layout
 
+\begin_layout Itemize
 change: Called when the contents of the widget have changed (eg change a
  text box's contents)
-\layout Itemize
+\end_layout
 
+\begin_layout Itemize
 activate: Called when the widget is activated by the user (eg click on a
  button)
-\layout Itemize
+\end_layout
 
+\begin_layout Itemize
 content: Called at creation time to obtain the content for the child widget.
  This may be used as a shortcut to using 
 \begin_inset Quotes eld
-\end_inset 
+\end_inset
 
 replaceInChild
 \begin_inset Quotes erd
-\end_inset 
+\end_inset
 
  in the constructor
-\layout Subsection
+\end_layout
 
+\begin_layout Subsection
 XRCPanel
-\layout Standard
+\end_layout
 
+\begin_layout Standard
 XRCPanel inherits from XRCWidget and wxPanel, implementing the necessary
  functionality to initialise a wxPanel from an XRC resource file.
  It provides no additional methods.
-\layout Subsection
+\end_layout
 
+\begin_layout Subsection
 XRCDialog
-\layout Standard
+\end_layout
 
+\begin_layout Standard
 XRCDialog inherits from XRCWidget and wxDialog, implementing the necessary
  functionality to initialise a wxDialog from an XRC resource file.
  It provides no additional methods.
-\layout Subsection
+\end_layout
 
+\begin_layout Subsection
 XRCFrame
-\layout Standard
+\end_layout
 
+\begin_layout Standard
 XRCFrame inherits from XRCWidget and wxFrame, implementing the necessary
  functionality to initialise a wxFrame from an XRC resource file.
  It provides no additional methods.
-\layout Subsection
+\end_layout
 
+\begin_layout Subsection
 XRCApp
-\layout Standard
+\end_layout
 
+\begin_layout Standard
 XRCApp inherits from XRCFrame and is designed to provide a shortcut for
  specifying the main frame of an application.
  It provides the methods 
 \begin_inset Quotes eld
-\end_inset 
+\end_inset
 
 MainLoop
 \begin_inset Quotes erd
-\end_inset 
+\end_inset
 
  and 
 \begin_inset Quotes eld
-\end_inset 
+\end_inset
 
 EndMainLoop
 \begin_inset Quotes erd
-\end_inset 
+\end_inset
 
  mirroring those of the wxApp class.
  When created, it creates a private wxApp class and makes itself the top-level
  window for the application.
-\layout Section
+\end_layout
 
+\begin_layout Section
 Tutorials
-\layout Standard
+\end_layout
 
+\begin_layout Standard
 The following are a number of quick tutorials to get you started using the
  framework.
  The code for these tutorials can be found in the 'examles' directory of
  the source distribution.
-\layout Subsection
+\end_layout
 
+\begin_layout Subsection
 The Basics
-\layout Standard
+\end_layout
 
+\begin_layout Standard
 This section provides a quick tutorial for creating an appliction using
  the XRCWidgets framework.
  The application will consist of a single widget called 'SimpleApp', and
@@ -297,232 +354,290 @@ This section provides a quick tutorial for creating an appliction using
  It will consist of a wxFrame with a text-box and a button, which prints
  a message to the terminal when the button is clicked.
  The frame will look something like this:
-\layout Standard
-\added_space_top smallskip \added_space_bottom smallskip \align center 
+\end_layout
 
+\begin_layout Standard
+\begin_inset VSpace smallskip
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+\align center
 \begin_inset Graphics
 	filename SimpleFrame.eps
 	scale 75
 	keepAspectRatio
 
-\end_inset 
+\end_inset
 
 
-\layout Standard
+\end_layout
 
+\begin_layout Standard
+\begin_inset VSpace smallskip
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
 It will be necessary to create two files: 'simple.py' containing the python
  code, and 'simple.xrc' containing the XRC definitions.
-\layout Subsubsection
+\end_layout
 
+\begin_layout Subsubsection
 Creating the XRC File
-\layout Standard
+\end_layout
 
+\begin_layout Standard
 There are many ways to create an XRC file.
  The author recommends using wxGlade, a RAD GUI designer itself written
  in wxPython.
  It is available from http://wxglade.sourceforge.net/.
-\layout Standard
+\end_layout
 
+\begin_layout Standard
 Launching wxGlade should result it an empty Application being displayed.
  First, set up the properties of the application to produce the desired
  output.
  In the 'Properties' window, select XRC as the output language and enter
  'simple.xrc' as the output path.
-\layout Standard
+\end_layout
 
+\begin_layout Standard
 Now to create the widget.
  From the main toolbar window, select the 
 \begin_inset Quotes eld
-\end_inset 
+\end_inset
 
 Add a Frame
 \begin_inset Quotes erd
-\end_inset 
+\end_inset
 
  button.
  Make sure that the class of the frame is 'wxFrame' and click OK.
  In the Properties window set the name of the widget to 
 \begin_inset Quotes eld
-\end_inset 
+\end_inset
 
 SimpleApp
 \begin_inset Quotes erd
-\end_inset 
+\end_inset
 
  - this is to correspond to the name of the class that is to be created.
-\layout Standard
+\end_layout
 
+\begin_layout Standard
 Populate the frame with whatever contents you like, using sizers to lay
  them out appropriately.
  Consult the wxGlade tutorial (http://wxglade.sourceforge.net/tutorial.php)
  for more details.
  Make sure that you include a text control named 
 \begin_inset Quotes eld
-\end_inset 
+\end_inset
 
 message
 \begin_inset Quotes erd
-\end_inset 
+\end_inset
 
  and a button named 
 \begin_inset Quotes eld
-\end_inset 
+\end_inset
 
 ok
 \begin_inset Quotes erd
-\end_inset 
+\end_inset
 
 .
-\layout Standard
+\end_layout
 
+\begin_layout Standard
 When the frame is finished, selecte Generate Code from the File menu to
  produce the XRC file.
  You may also like to save the wxGlade Application so that it can be edited
  later.
  Alternately, wxGlade provides the tool 
 \begin_inset Quotes eld
-\end_inset 
+\end_inset
 
 xrc2wxg
 \begin_inset Quotes erd
-\end_inset 
+\end_inset
 
  which can convert from the XRC file to a wxGlade project file.
-\layout Subsubsection
+\end_layout
 
+\begin_layout Subsubsection
 Creating the Python Code
-\layout Standard
+\end_layout
 
+\begin_layout Standard
 You should now have the file 'simple.xrc'.
  If you like, open it up in a text editor to see how the code is produced.
  If you are familiar with HTML or other forms of XML, you should be able
  to get an idea of what the contents mean.
-\layout Standard
+\end_layout
 
+\begin_layout Standard
 Next, create the python file 'simple.py' using the following code:
-\layout LyX-Code
+\end_layout
 
+\begin_layout LyX-Code
 from XRCWidgets import XRCApp
-\layout LyX-Code
+\end_layout
 
+\begin_layout LyX-Code
 class SimpleApp(XRCApp):
-\layout LyX-Code
+\end_layout
 
+\begin_layout LyX-Code
     def on_message_change(self,msg):
-\layout LyX-Code
+\end_layout
 
+\begin_layout LyX-Code
         print 
 \begin_inset Quotes eld
-\end_inset 
+\end_inset
 
 MESSAGE IS NOW:
 \begin_inset Quotes erd
-\end_inset 
+\end_inset
 
 , msg.GetValue()
-\layout LyX-Code
+\end_layout
 
+\begin_layout LyX-Code
     def on_ok_activate(self,bttn):
-\layout LyX-Code
+\end_layout
 
+\begin_layout LyX-Code
         print self.getChild(
 \begin_inset Quotes eld
-\end_inset 
+\end_inset
 
 message
 \begin_inset Quotes erd
-\end_inset 
+\end_inset
 
 ).GetValue()
-\layout Standard
+\end_layout
 
+\begin_layout Standard
 This code is all that is required to make a functioning application.
  Notice that the defined methods meet the general format of 
 \begin_inset Quotes eld
-\end_inset 
+\end_inset
 
 on_<child>_<action>
 \begin_inset Quotes erd
-\end_inset 
+\end_inset
 
  and so will be automatically connected as event handlers.
  The 
 \begin_inset Quotes eld
-\end_inset 
+\end_inset
 
 on_message_change
 \begin_inset Quotes erd
-\end_inset 
+\end_inset
 
  method will be called whenever the text in the message box is changed,
  and 
 \begin_inset Quotes eld
-\end_inset 
+\end_inset
 
 on_ok_activate
 \begin_inset Quotes erd
-\end_inset 
+\end_inset
 
  will be called whenever the button is clicked.
-\layout Subsubsection
+\end_layout
 
+\begin_layout Subsubsection
 Testing the Widget
-\layout Standard
+\end_layout
 
+\begin_layout Standard
 Once you have the files 'simple.py' and 'simple.xrc' ready, it is possible
  to put the widget into action.
  Launch a python shell and execute the following commands:
-\layout LyX-Code
+\end_layout
 
+\begin_layout LyX-Code
 from simple import SimpleApp
-\layout LyX-Code
+\end_layout
 
+\begin_layout LyX-Code
 app = SimpleApp()
-\layout LyX-Code
+\end_layout
 
+\begin_layout LyX-Code
 app.MainLoop()
-\layout Standard
+\end_layout
 
+\begin_layout Standard
 This code imports the widget's definition, creates the application and runs
  the event loop.
  The frame should appear and allow you to interact with it, printing messages
  to the console as the button is clicked or the message text is changed.
-\layout Subsection
+\end_layout
 
+\begin_layout Subsection
 A more complicated Frame
-\layout Standard
+\end_layout
 
+\begin_layout Standard
 This tutorial is yet to be completed.
  See the files 'menus.py' and menus.xrc' in the examples directory.
-\layout Standard
+\end_layout
 
+\begin_layout Standard
 Quick Guide:
-\layout Itemize
+\end_layout
 
+\begin_layout Itemize
 Create a frame as usual, and select the 'Has MenuBar' option in its properties.
  Do *not* create a seperate MenuBar, this wont work.
-\layout Itemize
+\end_layout
 
+\begin_layout Itemize
 Edit the menus of the MenuBar to your liking.
  Ensure that you fill in the 
 \begin_inset Quotes eld
-\end_inset 
+\end_inset
 
 name
 \begin_inset Quotes erd
-\end_inset 
+\end_inset
 
  field or the XML will not be generated correctly.
-\layout LyX-Code
+\end_layout
 
-\layout LyX-Code
+\begin_layout LyX-Code
 
-\layout LyX-Code
+\end_layout
 
-\layout LyX-Code
+\begin_layout LyX-Code
 
-\layout LyX-Code
+\end_layout
 
-\layout LyX-Code
+\begin_layout LyX-Code
 
-\the_end
+\end_layout
+
+\begin_layout LyX-Code
+
+\end_layout
+
+\begin_layout LyX-Code
+
+\end_layout
+
+\begin_layout LyX-Code
+
+\end_layout
+
+\end_body
+\end_document
