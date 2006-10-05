@@ -13,7 +13,7 @@ layout is defined in such a file.
 
 VER_MAJOR = 0
 VER_MINOR = 1
-VER_REL = 6
+VER_REL = 7
 VER_PATCH = ""
 VERSION = "%d.%d.%d%s" % (VER_MAJOR,VER_MINOR,VER_REL,VER_PATCH)
 

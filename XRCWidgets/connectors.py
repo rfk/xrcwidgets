@@ -56,7 +56,8 @@ class ChangeConnector(Connector):
     """
 
     _cons_entries = ("wxTextCtrl","wxCheckBox","wxListBox",
-                     "wxComboBox","wxRadioBox","wxChoice")
+                     "wxComboBox","wxRadioBox","wxChoice",
+                     "wxSlider")
     
     def connect_wxTextCtrl(self,cName,parent,handler):
         child = parent.getChild(cName)
@@ -101,6 +102,13 @@ class ChangeConnector(Connector):
         handler = lcurry(_EvtHandle,handler)
         wx.EVT_CHOICE(parent,parent.getChildId(cName),handler)
         return True
+        
+    def connect_wxSlider(self,cName,parent,handler):
+        child = parent.getChild(cName)
+        handler = lcurry(handler,child)
+        handler = lcurry(_EvtHandle,handler)
+	child.Bind(wx.EVT_SCROLL,handler)
+        return True
 
 
 class ContentConnector(Connector):
@@ -130,10 +138,17 @@ class ActivateConnector(Connector):
     of the control.
     """
     
-    _cons_entries = ("wxButton","wxCheckBox","wxMenuItem",
-                     "tool","wxListBox")
+    _cons_entries = ("wxButton","wxBitmapButton","wxCheckBox",
+                     "wxMenuItem", "tool","wxListBox")
     
     def connect_wxButton(self,cName,parent,handler):
+        child = parent.getChild(cName)
+        handler = lcurry(handler,child)
+        handler = lcurry(_EvtHandle,handler)
+        wx.EVT_BUTTON(parent,child.GetId(),handler)
+        return True
+        
+    def connect_wxBitmapButton(self,cName,parent,handler):
         child = parent.getChild(cName)
         handler = lcurry(handler,child)
         handler = lcurry(_EvtHandle,handler)
