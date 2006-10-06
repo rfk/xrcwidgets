@@ -2,6 +2,7 @@
 
 include examples/*.py
 include examples/*.xrc
+include examples/*.bmp
 
 include docs/*.ps
 include docs/*.pdf
