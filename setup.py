@@ -14,7 +14,7 @@ NAME = "XRCWidgets"
 
 from XRCWidgets import VERSION
 
-DESCRIPTION = "XRCWidgets GUI Development Framework"
+DESCRIPTION = "Rapid GUI Development Framework using wxPython and XRC"
 AUTHOR = "Ryan Kelly"
 AUTHOR_EMAIL = "ryan@rfk.id.au"
 URL="http://www.rfk.id.au/software/projects/XRCWidgets/"
