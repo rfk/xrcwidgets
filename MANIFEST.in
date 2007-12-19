@@ -7,6 +7,5 @@ include examples/*.bmp
 include docs/*.ps
 include docs/*.pdf
 
-recursive-include tools *
 recursive-include licence *
 
