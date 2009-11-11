@@ -1,7 +1,0 @@
-
-
-    * Implement _getChild for more widget types:
-        * toolbars
-
-    * implement events for the current widget, perhaps using 'self'
-

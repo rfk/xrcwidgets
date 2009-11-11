@@ -1,6 +1,6 @@
-# Copyright 2004, Ryan Kelly
-# Released under the terms of the wxWindows Licence, version 3.
-# See the file 'lincence/preamble.txt' in the main distribution for details.
+# Copyright 2004-2009, Ryan Kelly
+# Released under the terms of the MIT Licence.
+# See the file 'LICENSE.txt' in the main distribution for details.
 """
 
     XRCWidgets.utils:  Misc utility classes for XRCWidgets framework
@@ -52,7 +52,7 @@ class rcurry(_curry):
 
 
 ##
-##  Basic XML parsing for our own reading of the file
+##  Basic XML parsing for our own reading of the XRC file
 ##
 
 from xml.parsers import expat

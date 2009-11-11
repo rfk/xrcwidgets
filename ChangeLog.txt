@@ -1,0 +1,6 @@
+
+
+v0.2.0:
+
+  * relicensed under the BSD License
+  * "VERSION" and related constants are now "__version__" and friends

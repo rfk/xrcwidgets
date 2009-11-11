@@ -1,6 +1,6 @@
 # Copyright 2004, Ryan Kelly
-# Released under the terms of the wxWindows Licence, version 3.
-# See the file 'lincence/preamble.txt' in the main distribution for details.
+# Released under the terms of the MIT license
+# See the file 'LICENSE.txt' in the main distribution for details.
 """
 
     XRCWidgets:   GUI Toolkit build around wxPython and the XRC file format
@@ -11,11 +11,12 @@ layout is defined in such a file.
 
 """
 
-VER_MAJOR = 0
-VER_MINOR = 1
-VER_REL = 8
-VER_PATCH = ""
-VERSION = "%d.%d.%d%s" % (VER_MAJOR,VER_MINOR,VER_REL,VER_PATCH)
+__ver_major__ = 0
+__ver_minor__ = 2
+__ver_patch__  = 0
+__ver_sub__ = ""
+__version__ = "%d.%d.%d%s" % (__ver_major__,__ver_minor__,
+                              __ver_patch__,__ver_sub__)
 
 
 import sys

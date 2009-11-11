@@ -1,11 +1,13 @@
 
 
+include LICENSE.txt
+include README.txt
+include TODO.txt
+include ChangeLog.txt
+
 include examples/*.py
 include examples/*.xrc
 include examples/*.bmp
 
-include docs/*.ps
-include docs/*.pdf
 
-recursive-include licence *
 
