@@ -55,7 +55,7 @@ class XRCWidgetsError(Exception):
 ########
 
 class XRCWidget:
-    """Mix-in Class providing basic XRC behaviors.
+    """Mix-in class providing basic XRC behaviors.
 
     Classes inheriting from this class should also inherit from one of the
     wxPython GUI classes that can be loaded from an XRC file - for example,
@@ -97,6 +97,7 @@ class XRCWidget:
 
     def compact(self):
         """Reduce memory/resource usage of the widget.
+
         This method is called automatically after initialisation to drop
         references to unneeded resources.  These may be accumulated as
         as time goes on, so this method may be called manually to release
@@ -107,6 +108,7 @@ class XRCWidget:
 
     ##  Methods for dealing with XRC resource files
 
+    @classmethod
     def _findXRCFile(cls):
         """Locate the XRC file for this class, and return its location.
 
@@ -126,11 +128,11 @@ class XRCWidget:
             if os.path.exists(pth):
                 return pth
         raise XRCWidgetsError("XRC File '%s' could not be found" % (filePath,))
-    _findXRCFile = classmethod(_findXRCFile)
 
-
+    @staticmethod
     def _getXRCFileLocations():
         """Iterator over the possible locations where XRC files are kept.
+
         XRC files can be found in the following places:
 
             * the directories in sys.path
@@ -140,7 +142,6 @@ class XRCWidget:
         for p in sys.path:
             yield p
         yield os.path.normpath(os.path.join(sys.prefix,"share/XRCWidgets/data"))
-    _getXRCFileLocations = staticmethod(_getXRCFileLocations)
 
 
     def _loadXRCFile(self,fileNm,parent):
@@ -170,15 +171,6 @@ class XRCWidget:
         if self._xmltree is None:
             xmlfile = file(self._xrcfile)
             self._xmltree = XMLDocTree(xmlfile)
-
-
-    ##  wxPython 2.5 introduces the PostCreate method to wrap some
-    ##  of ugliness.  Check the wx version and implement this method
-    ##  for versions less than 2.5
-    if wx.VERSION[0] <= 2 and not wx.VERSION[1] >= 5:
-        def PostCreate(self,pre):
-            self.this = pre.this
-            self._setOORInfo(self)
 
 
     ##
@@ -225,6 +217,7 @@ class XRCWidget:
 
     def getChildType(self,cName):
         """Determine the type of the named child.
+
         The type is returned as a string, typically the 'class' attribute of
         the defining element in the XRC file.  For example, "wxTextCtrl" or
         "wxListBox".
