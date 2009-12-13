@@ -7,10 +7,16 @@
 from distutils.core import setup
 import os
 
+
+XRCWidgets = {}
+try:
+    execfile("XRCWidgets/__init__.py",XRCWidgets)
+except ImportError:
+    pass
+
+
 NAME = "XRCWidgets"
-
-from XRCWidgets import __version__ as VERSION
-
+VERSION = XRCWidgets["__version__"]
 DESCRIPTION = "Rapid GUI Development Framework using wxPython and XRC"
 AUTHOR = "Ryan Kelly"
 AUTHOR_EMAIL = "ryan@rfk.id.au"

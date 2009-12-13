@@ -1,5 +1,11 @@
 
 
+v0.2.1:
+
+  * relicensed under the MIT License (I find it simpler than BSD)
+  * don't require the module to be importable in setup.py
+
+
 v0.2.0:
 
   * relicensed under the BSD License
