@@ -80,6 +80,9 @@ class XRCWidget(object):
     # quicker.
     _useMagicMethods = True
 
+    # When this event is fired, we know the widget is fully initialized.
+    _initEvent = wx.EVT_WINDOW_CREATE
+
     def __init__(self,parent=NotGiven):
         self._xmltree = None
         if self._xrcfile is None:
@@ -88,13 +91,16 @@ class XRCWidget(object):
         if parent is NotGiven:
             #  Assume the caller is doing two-phase creation themselves.
             self.PostCreate(pre)
-            self.Bind(wx.EVT_WINDOW_CREATE,self.on_create)
+            self.Bind(self._initEvent,self._handle_on_create)
         else:
             #  Delegate the two-phase create to the XRC loader
             self._loadXRCFile(self._xrcfile,pre,parent)
 
-    def on_create(self,event=None):
-        self.Unbind(wx.EVT_WINDOW_CREATE)
+    def _handle_on_create(self,event=None):
+        self.Unbind(self._initEvent)
+        wx.CallAfter(self.on_create)
+
+    def on_create(self):
         if self._useMagicMethods:
             self._connectEventMethods()
 
@@ -158,16 +164,16 @@ class XRCWidget(object):
         name for the resource, rather than the class name.
         """
         xrcres = xrc.XmlResource(fileNm)
-        if self._xrcname is not None:
-            resName = self._xrcname
-        else:
-            resName = self.__class__.__name__
-        self._loadOn(xrcres,pre,parent,resName)
+        if self._xrcname is None:
+            self._xrcname = self.__class__.__name__
+        self._loadOn(xrcres,pre,parent,self._xrcname)
         self.PostCreate(pre)
         self.on_create()
 
     def _makeXmlTree(self):
         """Populate self._xmltree with a representation of the XRC file."""
+        if self._xrcname is None:
+            self._xrcname = self.__class__.__name__
         if self._xmltree is None:
             xmlfile = file(self._xrcfile)
             self._xmltree = XMLDocTree(xmlfile)
@@ -185,7 +191,7 @@ class XRCWidget(object):
             self._makeXmlTree()
             try:
                 data = self._xmltree.elements[cName]
-            except:
+            except KeyError:
                 raise XRCWidgetsError("Child '%s' not found" % (cName,))
             # Determine object class, pass data off to appropriate method
             mthdNm = "_getChild_%s" % (data.attrs["class"],)
