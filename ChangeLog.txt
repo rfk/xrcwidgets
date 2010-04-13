@@ -1,7 +1,7 @@
 
 v0.3.0:
 
-  * Let XRCWidget subclasses participate in two-phase initialisation
+  * Let XRCWidget subclasses participate in two-phase creation
      * this allows you to name an XRCWidget in a 'subclass' attribute of the
        XRC file, and have it create automatically
      * for this to work, it must be possible to call the widget's __init__
