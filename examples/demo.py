@@ -1,7 +1,8 @@
 
-from wxPython import wx
 
+import wx
 from XRCWidgets import XRCApp, XRCDialog
+
 from demo_widgets import DemoPanel
 
 #  Simple frame to demonstrate the use of menus and toolbar.

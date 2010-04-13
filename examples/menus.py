@@ -1,6 +1,6 @@
 
 
-from wxPython import wx
+import wx
 from XRCWidgets import XRCApp
 
 
