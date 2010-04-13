@@ -12,8 +12,8 @@ layout is defined in such a file.
 """
 
 __ver_major__ = 0
-__ver_minor__ = 2
-__ver_patch__  = 1
+__ver_minor__ = 3
+__ver_patch__  = 0
 __ver_sub__ = ""
 __version__ = "%d.%d.%d%s" % (__ver_major__,__ver_minor__,
                               __ver_patch__,__ver_sub__)
@@ -27,14 +27,6 @@ from wx import xrc
 
 from XRCWidgets.utils import lcurry, XMLDocTree, XMLElementData
 from XRCWidgets.connectors import getConnectors
-
-
-#  The following seems to work around a wxWidgets bug which is making
-#  XRCApp segfault, simply by creating a PySimpleApp.
-#from wxPython import wx as wx2
-#_WorkAround_app = wx2.wxPySimpleApp(0)
-#del _WorkAround_app
-#del wx2
 
 
 ########
@@ -54,7 +46,13 @@ class XRCWidgetsError(Exception):
 ##
 ########
 
-class XRCWidget:
+
+class NotGiven:
+    """Sentinal to indicate that no value was given for an argument."""
+    pass
+
+
+class XRCWidget(object):
     """Mix-in class providing basic XRC behaviors.
 
     Classes inheriting from this class should also inherit from one of the
@@ -82,18 +80,22 @@ class XRCWidget:
     # quicker.
     _useMagicMethods = True
 
-
-    def __init__(self,parent):
-        # Attribute initialisation
+    def __init__(self,parent=NotGiven):
         self._xmltree = None
-
-        # XRC resource loading
         if self._xrcfile is None:
             self._xrcfile = self._findXRCFile()
-        self._loadXRCFile(self._xrcfile,parent)
+        pre = self._getPre()
+        if parent is NotGiven:
+            #  Assume the caller is doing two-phase creation themselves.
+            self.PostCreate(pre)
+            self.Bind(wx.EVT_WINDOW_CREATE,self.on_create)
+        else:
+            #  Delegate the two-phase create to the XRC loader
+            self._loadXRCFile(self._xrcfile,pre,parent)
+
+    def on_create(self,event=None):
         if self._useMagicMethods:
             self._connectEventMethods()
-
 
     def compact(self):
         """Reduce memory/resource usage of the widget.
@@ -104,7 +106,6 @@ class XRCWidget:
         them if they are causing a problem.
         """
         self._xmltree = None
-
 
     ##  Methods for dealing with XRC resource files
 
@@ -143,28 +144,26 @@ class XRCWidget:
             yield p
         yield os.path.normpath(os.path.join(sys.prefix,"share/XRCWidgets/data"))
 
-
-    def _loadXRCFile(self,fileNm,parent):
+    def _loadXRCFile(self,fileNm,pre,parent):
         """Load this object's definitions from an XRC file.
 
         The file at <fileNm> should be an XRC file containing a resource
         with the same name as this class.  This resource's definition
-        will be loaded into the current object using two-stage initialisation,
-        abstracted by the object's '_getPre' and '_loadOn' methods.
+        will be loaded into the current object using two-stage initialisation.
+        <pre> must be the pre-initialised widget object to load into, and 
         <parent> must be the desired parent of the to-be-created widget.
 
         The class-level attribute _xrcname may be used to specify an alternate
         name for the resource, rather than the class name.
         """
-        self._xrcres = xrc.XmlResource(fileNm)
-        pre = self._getPre()
+        xrcres = xrc.XmlResource(fileNm)
         if self._xrcname is not None:
             resName = self._xrcname
         else:
             resName = self.__class__.__name__
-        self._loadOn(self._xrcres,pre,parent,resName)
+        self._loadOn(xrcres,pre,parent,resName)
         self.PostCreate(pre)
-
+        self.OnCreate()
 
     def _makeXmlTree(self):
         """Populate self._xmltree with a representation of the XRC file."""
@@ -172,10 +171,7 @@ class XRCWidget:
             xmlfile = file(self._xrcfile)
             self._xmltree = XMLDocTree(xmlfile)
 
-
-    ##
     ##  Methods for obtaining references to child widgets
-    ##
 
     def getChild(self,cName):
         """Lookup and return a child widget by name."""
@@ -195,7 +191,7 @@ class XRCWidget:
             try:
                 mthd = getattr(self,mthdNm)
             except AttributeError:
-                raise XRCWidgetsError("Child '%s' of unsupported type"%(cName,))
+                raise XRCWidgetsError("Child '%s' of unsupported type '%s'"%(cName,data.attrs["class"],))
             chld = mthd(data)
             if chld is None:
                 raise XRCWidgetsError("Child '%s' not found" % (cName,))
@@ -269,7 +265,6 @@ class XRCWidget:
         if len(lblParts) == 2:
             lbl = "".join(lblParts)
         lbl = lbl.split("\t")[0]
-
         # Get and return the widget
         for item in menu.GetMenuItems():
             if item.GetLabel() == lbl:
@@ -294,7 +289,6 @@ class XRCWidget:
         lblParts = lbl.split("_")
         if len(lblParts) == 2:
             lbl = "".join(lblParts)
-
         # Find parent widget, get and return reference
         mData = data.parent
         cls = mData.attrs.get("class")
@@ -453,10 +447,10 @@ class XRCWidget:
 ########
 
 
-class XRCPanel(wx.Panel,XRCWidget):
+class XRCPanel(XRCWidget,wx.Panel):
     """wx.Panel with XRCWidget behaviors."""
 
-    def __init__(self,parent,id=-1,*args,**kwds):
+    def __init__(self,parent=NotGiven,id=-1,*args,**kwds):
         XRCWidget.__init__(self,parent)
 
     def _getPre(self):
@@ -467,10 +461,10 @@ class XRCPanel(wx.Panel,XRCWidget):
 
 
 
-class XRCDialog(wx.Dialog,XRCWidget):
+class XRCDialog(XRCWidget,wx.Dialog):
     """wx.Dialog with XRCWidget behaviors."""
 
-    def __init__(self,parent,id=-1,title="Untitled Dialog",*args,**kwds):
+    def __init__(self,parent=NotGiven,id=-1,title="Untitled Dialog",*args,**kwds):
         XRCWidget.__init__(self,parent)
 
     def _getPre(self):
@@ -481,10 +475,10 @@ class XRCDialog(wx.Dialog,XRCWidget):
 
 
 
-class XRCFrame(wx.Frame,XRCWidget):
+class XRCFrame(XRCWidget,wx.Frame):
     """wx.Frame with XRCWidget behaviors."""
 
-    def __init__(self,parent,id=-1,title="Untitled Frame",*args,**kwds):
+    def __init__(self,parent=NotGiven,id=-1,title="Untitled Frame",*args,**kwds):
         XRCWidget.__init__(self,parent)
 
     def _getPre(self):
@@ -496,6 +490,7 @@ class XRCFrame(wx.Frame,XRCWidget):
 
 class XRCApp(XRCFrame):
     """XRCFrame that can act as a standalone application.
+
     This class provides a convient way to specify the main frame of
     an application.  It is equivalent to an XRCFrame, but provides
     the following additional methods:
