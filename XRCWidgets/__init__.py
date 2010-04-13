@@ -94,6 +94,7 @@ class XRCWidget(object):
             self._loadXRCFile(self._xrcfile,pre,parent)
 
     def on_create(self,event=None):
+        self.Unbind(wx.EVT_WINDOW_CREATE)
         if self._useMagicMethods:
             self._connectEventMethods()
 
