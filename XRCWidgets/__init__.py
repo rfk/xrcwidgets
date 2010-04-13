@@ -163,7 +163,7 @@ class XRCWidget(object):
             resName = self.__class__.__name__
         self._loadOn(xrcres,pre,parent,resName)
         self.PostCreate(pre)
-        self.OnCreate()
+        self.on_create()
 
     def _makeXmlTree(self):
         """Populate self._xmltree with a representation of the XRC file."""
@@ -514,7 +514,5 @@ class XRCApp(XRCFrame):
 
     def ExitMainLoop(self):
         self.__app.ExitMainLoop()
-
-
 
 
